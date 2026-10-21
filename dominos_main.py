@@ -27,6 +27,6 @@ class Chain: #jeu en cours
 dominos : list[Domino] = []
 for i in range(7) :
     for j in range(i,7) :
-        dominos.append(Domino(d=(i,j)))
+        dominos.append(Domino((i,j)))
 
 print(dominos)
