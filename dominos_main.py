@@ -1,11 +1,14 @@
 class Domino:
-    d:tuple # domino
-    val:int #la somme des valeurs
-    double:bool #on def les attributs
+    def __init_(self):
+
+
+    d: tuple  # domino
+    val: int  # la somme des valeurs
+    double: bool  # si le domino est double ou pas, car pas besoin de left ou right
+
     def inv(self):
         if not self.double:
             self.d=(self.d[1], self.d[0]) #fct qui inverse les deux positions
-
 
 class Chain: #jeu en cours
     c:list[Domino]
@@ -27,4 +30,4 @@ for i in range(7) :
     for j in range(i,7) :
         dominos.append(Domino(d=(i,j), val = i+j, double = True if i==j else False))
 
-
+print(dominos)
