@@ -38,7 +38,7 @@ def distribute(jeu) :
     talon = []
     random.shuffle(jeu)  #melange le jeu a chaque fois
     biggest_domino=jeu[0]
-    beggining_p=1
+    begining_p=1
     db=jeu[0].db()
     for i in range(7) :
         jeu_p1.append(jeu[i])
@@ -48,34 +48,38 @@ def distribute(jeu) :
             if jeu[i].db():
                 if jeu[i].t()[0]>biggest_domino.t()[0]:
                     biggest_domino=jeu[i]
-                    beggining_p=1
+                    begining_p=1
             if jeu[i+7].db():
                 if jeu[i+7].t()[0] > biggest_domino.t()[0]:
                     biggest_domino = jeu[i+7]
-                    beggining_p = 2
+                    begining_p = 2
         else:
             if jeu[i].db():
                 biggest_domino=jeu[i]
-                beggining_p=1
+                begining_p=1
                 db=True
             if jeu[i+7].db() and db:
                 if jeu[i+7].t()[0] > biggest_domino.t()[0]:
                     biggest_domino = jeu[i+7]
-                    beggining_p = 2
+                    begining_p = 2
             if jeu[i+7].db() and not db:
                 biggest_domino = jeu[i + 7]
-                beggining_p = 2
+                begining_p = 2
                 db=True
             if not db:
                 if jeu[i].val()>biggest_domino.val():
                     biggest_domino = jeu[i]
-                    beggining_p = 1
+                    begining_p = 1
                 if jeu[i+7].val()>biggest_domino.val():
                     biggest_domino=jeu[i+7]
-                    beggining_p=2
-    return jeu_p1, jeu_p2, talon, beggining_p, biggest_domino
+                    begining_p=2
+    return jeu_p1, jeu_p2, talon, begining_p, biggest_domino
 
-print(distribute(ensemble))
+#print(distribute(ensemble))
 
-#def play() :
+def play() :
+    jeu_p1, jeu_p2, talon, begining_p, biggest_domino = distribute(ensemble)
+    cp = begining_p
+    if cp == 1 :
+        cp = 1
 
