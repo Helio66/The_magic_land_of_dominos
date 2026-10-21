@@ -19,6 +19,8 @@ class Chain: #jeu en cours
         self.c:list[Domino]=[d]
         self.right=d.t()[1] #valeur du domino tt a droite
         self.left=d.t()[0] #valeur du domino tt a gauche
+    def ex(self):
+        return self.left, self.right
     def push(self, d:Domino, ex:str): #pour effectuer un nouveau coup
         if ex=='right': #si on peut jouer sur le domino de droite
             self.c.append(d) #on ajt ce domino au jeu
