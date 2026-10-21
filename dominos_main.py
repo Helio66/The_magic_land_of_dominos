@@ -8,6 +8,8 @@ class Domino:
         return self.d
     def db(self):
         return self.double
+    def val(self):
+        return self.d[0]+self.d[1]
     def inv(self):
         if not self.double:
             self.d=(self.d[1], self.d[0]) #fct qui inverse les deux positions
@@ -65,10 +67,10 @@ def distribute(jeu) :
                 beggining_p = 2
                 db=True
             if not db:
-                if jeu[i].t()[0]+jeu[i].t()[1]>biggest_domino.t()[0]+biggest_domino.t()[1]:
+                if jeu[i].val()>biggest_domino.val():
                     biggest_domino = jeu[i]
                     beggining_p = 1
-                if jeu[i+7].t()[0]+jeu[i+7].t()[1]>biggest_domino.t()[0]+biggest_domino.t()[1]:
+                if jeu[i+7].val()>biggest_domino.val():
                     biggest_domino=jeu[i+7]
                     beggining_p=2
     return jeu_p1, jeu_p2, talon, beggining_p, biggest_domino
