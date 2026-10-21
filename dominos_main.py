@@ -4,4 +4,5 @@ class Domino:
     double:bool #on def les attributs
     def inv(self):
         if not self.double:
-            self.d=(self.d[1], self.d[0])
+            self.d=(self.d[1], self.d[0]) #fct qui inverse les deux positions
+
