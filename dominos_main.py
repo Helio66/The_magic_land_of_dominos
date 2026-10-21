@@ -77,9 +77,18 @@ def distribute(jeu) :
 
 #print(distribute(ensemble))
 
+
+def can_play(jeu_p, plateau) :
+
+
+
+
+
+
+
 def play() :
     jeu_p1, jeu_p2, talon, begining_p, biggest_domino = distribute(ensemble)
     cp = begining_p
     if cp == 1 :
-        cp = 1
+
 
