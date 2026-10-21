@@ -93,15 +93,21 @@ def can_play(jeu_p, plateau) :
 def remove(d, pile):
     for i in range(len(pile)):
         if pile[i]==d:
-            pile[i], pile[len(pile)-1]=pile[len(pile)-1], pile[i]
+            pile[i], pile[len(pile)-1]=pile[len(pile)-1], pile[i] #on echange les pos pour appliquer pop
             pile.pop()
-            break
+            break #on sort de la boucle pour eviter des recursions inutiles qd on a trv d
 
 def play() :
 
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
     if cp == 1 :
         current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
+        remove(biggest_domino, jeu_p1)
+        cp = 2
+    else :
+        current_game = Chain(biggest_domino)
+        remove(biggest_domino, jeu_p2)
+        cp = 1
 
 
 
