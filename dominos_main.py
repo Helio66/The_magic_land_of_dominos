@@ -30,7 +30,7 @@ class Chain: #jeu en cours
             self.c=[dom for dom in tempo] #on ajoute le domino a gauche
             self.left=d.d[0] #on considere la nvl valeur de gauche
 
-ensemble : list[Domino] = [Domino(i,j) for i in range(7) for j in range(i,7)]
+ensemble : list[Domino] = [Domino((i,j)) for i in range(7) for j in range(i,7)]
 
 def distribute(jeu) :
     jeu_p1 = []
@@ -75,7 +75,7 @@ def distribute(jeu) :
                     beggining_p=2
     return jeu_p1, jeu_p2, talon, beggining_p, biggest_domino
 
+print(distribute(ensemble))
 
-
-def play() :
+#def play() :
 
