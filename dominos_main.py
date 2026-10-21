@@ -79,16 +79,31 @@ def distribute(jeu) :
 
 #print(distribute(ensemble))
 
+def can_play_domino(domino, jeu_p, plateau) :
+    pass
+
 
 def can_play(jeu_p, plateau) :
     left, right = plateau.ex()
     for d in jeu_p :
         dom = d.t()
         if left in [dom[0], dom[1]] :
-            return True
+            return True #...je cherche a acceder au domino qui peut etre joue
         elif right in [dom[0], dom[1]] :
             return True
     return False
+
+
+def playable_dominos(jeu_p, plateau) :
+    playable = []
+    for d in jeu_p :
+        dom = d.t()
+        if can_play_domino(dom, jeu_p, plateau) :
+            playable.append(dom)
+    return playable
+
+
+
 
 def remove(d, pile):
     for i in range(len(pile)):
@@ -98,7 +113,6 @@ def remove(d, pile):
             break #on sort de la boucle pour eviter des recursions inutiles qd on a trv d
 
 def play() :
-
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
     if cp == 1 :
         current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
