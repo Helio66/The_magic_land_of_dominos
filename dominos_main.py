@@ -28,4 +28,18 @@ class Chain: #jeu en cours
             self.left=d.d[0] #on considere la nvl valeur de gauche
 
 jeu : list[Domino] = [Domino(i,j) for i in range(7) for j in range(i,7)]
-random.shuffle(jeu) #melange le jeu a chaque fois
+
+def distribute(jeu) :
+    jeu_p1 = []
+    jeu_p2 = []
+    talon = []
+    for i in range(7) :
+        jeu_p1.append(jeu[i])
+        jeu_p2.append(jeu[7+i])
+        talon.append(jeu[14+i])
+    return jeu_p1, jeu_p2, talon
+
+
+
+def play() :
+    random.shuffle(jeu) #melange le jeu a chaque fois
