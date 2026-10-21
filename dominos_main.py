@@ -81,6 +81,14 @@ def distribute(jeu) :
 
 
 def can_play(jeu_p, plateau) :
+    left, right = plateau.ex()
+    for d in jeu_p :
+        dom = d.t()
+        if left in [dom[0], dom[1]] :
+            return True
+        elif right in [dom[0], dom[1]] :
+            return True
+    return False
 
 
 
@@ -92,5 +100,6 @@ def play() :
     jeu_p1, jeu_p2, talon, begining_p, biggest_domino = distribute(ensemble)
     cp = begining_p
     if cp == 1 :
+
 
 
