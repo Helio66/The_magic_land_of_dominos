@@ -22,4 +22,9 @@ class Chain: #jeu en cours
             self.c=[dom for dom in tempo] #on ajoute le domino a gauche
             self.left=d.d[0] #on considere la nvl valeur de gauche
 
+dominos : list[Domino] = []
+for i in range(7) :
+    for j in range(i,7) :
+        dominos.append(Domino(d=(i,j), val = i+j, double = True if i==j else False))
+
 
