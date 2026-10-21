@@ -1,2 +1,2 @@
 class Domino:
-    pass
+    pass #je pense qu'on est les boss
