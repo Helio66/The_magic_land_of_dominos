@@ -90,7 +90,12 @@ def can_play(jeu_p, plateau) :
             return True
     return False
 
-
+def remove(d, pile):
+    for i in range(len(pile)):
+        if pile[i]==d:
+            pile[i], pile[len(pile)-1]=pile[len(pile)-1], pile[i]
+            pile.pop()
+            break
 
 def play() :
 
