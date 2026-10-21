@@ -1,3 +1,6 @@
+import random
+
+
 class Domino:
     def __init__(self, d:tuple):
         self.d=d #domino sous la forme d'un couple d'entiers
@@ -24,9 +27,5 @@ class Chain: #jeu en cours
             self.c=[dom for dom in tempo] #on ajoute le domino a gauche
             self.left=d.d[0] #on considere la nvl valeur de gauche
 
-dominos : list[Domino] = []
-for i in range(7) :
-    for j in range(i,7) :
-        dominos.append(Domino((i,j)))
-
-print(dominos)
+jeu : list[Domino] = [Domino(i,j) for i in range(7) for j in range(i,7)]
+random.shuffle(jeu)
