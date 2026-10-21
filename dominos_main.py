@@ -1,19 +1,18 @@
 class Domino:
-    def __init_(self):
-
-
-    d: tuple  # domino
-    val: int  # la somme des valeurs
-    double: bool  # si le domino est double ou pas, car pas besoin de left ou right
-
+    def __init__(self, d:tuple):
+        self.d=d #domino sous la forme d'un couple d'entiers
+        self.double=(d[0]==d[1]) #test : double ou non ?
+    def t(self):
+        return self.d
     def inv(self):
         if not self.double:
             self.d=(self.d[1], self.d[0]) #fct qui inverse les deux positions
 
 class Chain: #jeu en cours
-    c:list[Domino]
-    right=int #valeur du domino tt a droite
-    left=int #valeur du domino tt a gauche
+    def __init__(self, d:Domino):
+        self.c:list[Domino]=[d]
+        self.right=d.t()[1] #valeur du domino tt a droite
+        self.left=d.t()[0] #valeur du domino tt a gauche
     def push(self, d:Domino, ex:str): #pour effectuer un nouveau coup
         if ex=='right': #si on peut jouer sur le domino de droite
             self.c.append(d) #on ajt ce domino au jeu
@@ -28,6 +27,6 @@ class Chain: #jeu en cours
 dominos : list[Domino] = []
 for i in range(7) :
     for j in range(i,7) :
-        dominos.append(Domino(d=(i,j), val = i+j, double = True if i==j else False))
+        dominos.append(Domino(d=(i,j)))
 
 print(dominos)
