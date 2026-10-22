@@ -89,7 +89,6 @@ def can_play(jeu_p, plateau) :
             return True
     return False
 
-
 def playable_dominos(jeu_p, plateau) :
     playable = []
     for d in jeu_p :
@@ -97,9 +96,6 @@ def playable_dominos(jeu_p, plateau) :
         if can_play([d], plateau): #cela va nous dire si on peut jouer le domino d
             playable.append(dom)
     return playable
-
-
-
 
 def remove(d, pile):
     for i in range(len(pile)):
@@ -118,6 +114,7 @@ def play() :
         current_game = Chain(biggest_domino)
         remove(biggest_domino, jeu_p2)
         cp = 1
+
 
 
 
