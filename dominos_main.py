@@ -79,10 +79,6 @@ def distribute(jeu) :
 
 #print(distribute(ensemble))
 
-def can_play_domino(domino, jeu_p, plateau) :
-    pass
-
-
 def can_play(jeu_p, plateau) :
     left, right = plateau.ex()
     for d in jeu_p :
@@ -98,7 +94,7 @@ def playable_dominos(jeu_p, plateau) :
     playable = []
     for d in jeu_p :
         dom = d.t()
-        if can_play_domino(dom, jeu_p, plateau) :
+        if can_play([d], plateau): #cela va nous dire si on peut jouer le domino d
             playable.append(dom)
     return playable
 
