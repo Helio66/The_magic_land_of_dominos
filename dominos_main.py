@@ -169,7 +169,7 @@ def play() :
     else:
         print(f"{cp} a gagné. Bravo !")
 
-
+play()
 
 
 
