@@ -124,7 +124,16 @@ def play() :
             print(f'''le plateau actuel est {current_game.plateau()}''')
             print(f'''vous pouvez jouer les dominos suivants : {playable_dominos(jeu[cp], current_game)}''' )
             play_d=int(input("Entrez l'indice du domino à jouer : ")) #input pour pouvoir entrer une question et une reponse de l'user. on precise int psk ca renvoie forcement une chaine de caractere
-
+            side=input("De quel côté du plateau voulez vous le jouer (right or left)? ")
+            cd=jeu[cp][play_d]
+            if side=='right':
+                if cd.t()[0]!=current_game.ex()[1]:
+                    cd.inv()
+            else:
+                if cd.t()[1]!=current_game.ex()[0]:
+                    cd.inv()
+            current_game.push(cd, side)
+            remove(cd, jeu[cp])
 
 
 
