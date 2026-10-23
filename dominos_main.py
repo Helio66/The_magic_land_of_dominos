@@ -123,7 +123,8 @@ def play() :
             print(f'''c'est au joueur {cp} de jouer.''')
             print(f'''le plateau actuel est {current_game.plateau()}''')
             print(f'''vous pouvez jouer les dominos suivants : {playable_dominos(jeu[cp], current_game)}''' )
-            play_d=int(input("Entrez l'indice du domino à jouer : "))
+            play_d=int(input("Entrez l'indice du domino à jouer : ")) #input pour pouvoir entrer une question et une reponse de l'user. on precise int psk ca renvoie forcement une chaine de caractere
+
 
 
 
