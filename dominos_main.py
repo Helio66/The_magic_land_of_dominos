@@ -119,7 +119,8 @@ def play() :
         remove(biggest_domino, jeu_p2)
         cp = 1
     while not win :
-        if can_play(jeu[cp], current_game) :
+
+        if can_play(jeu[cp], current_game) : #dans ce cas, le jeu se termine si le joueur n'a plus de domino
             print(f'''c'est au joueur {cp} de jouer.''')
             print(f'''le plateau actuel est {current_game.plateau()}''')
             print(f'''vous pouvez jouer les dominos suivants : {playable_dominos(jeu[cp], current_game)}''' )
@@ -134,6 +135,10 @@ def play() :
                     cd.inv()
             current_game.push(cd, side)
             remove(cd, jeu[cp])
+            if not jeu[cp]: #si la liste est vide
+                win = True
+            else :
+                cp = cp%2 + 1
 
 
 
