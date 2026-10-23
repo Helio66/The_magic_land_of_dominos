@@ -110,7 +110,6 @@ def play() :
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
     win = False
     win_stop=False #winstop = True si le talon est vide et le cp peut pas jouer
-    winning_player = 0
     jeu={1:jeu_p1, 2:jeu_p2}
     if cp == 1 :
         current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
@@ -158,10 +157,17 @@ def play() :
         score= {1 : 0, 2 : 0}
         for player in score :
             for dom in jeu[player] :
-                score[d] += dom.val()
-                if score[1]
-        winning_player =
-    print(f"{cp} a gagné. Bravo !")
+                score[player] += dom.val()
+        if score[1]<score[2]:
+            print(f'''Le joueur {1} gagne, avec un score de {score[1]}''')
+            print(f'''Le joueur {2} a un score de {score[2]}''')
+        elif score[1]>score[2]:
+            print(f'''Le joueur {2} gagne, avec un score de {score[2]}''')
+            print(f'''Le joueur {1} a un score de {score[1]}''')
+        else:
+            print(f'''Les deux joueurs ont le même score, c'est un match nul. Bravo à tous les deux !''')
+    else:
+        print(f"{cp} a gagné. Bravo !")
 
 
 
