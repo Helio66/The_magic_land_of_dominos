@@ -109,7 +109,8 @@ def remove(d, pile):
 def play() :
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
     win = False
-    win_stop=False
+    win_stop=False #winstop = True si le talon est vide et le cp peut pas jouer
+    winning_player = 0
     jeu={1:jeu_p1, 2:jeu_p2}
     if cp == 1 :
         current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
@@ -153,7 +154,14 @@ def play() :
                 else:
                     win_stop=True
                 cp = cp%2 + 1
-
+    if win_stop :
+        score= {1 : 0, 2 : 0}
+        for player in score :
+            for dom in jeu[player] :
+                score[d] += dom.val()
+                if score[1]
+        winning_player =
+    print(f"{cp} a gagné. Bravo !")
 
 
 
