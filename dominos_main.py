@@ -48,6 +48,7 @@ def distribute(jeu) :
         jeu_p1.append(jeu[i])
         jeu_p2.append(jeu[7+i])
         talon.append(jeu[14+i])
+        talon.append(jeu[21+i])
         if db:
             if jeu[i].db():
                 if jeu[i].t()[0]>biggest_domino.t()[0]:
@@ -180,7 +181,8 @@ def play() :
     else:
         print(f"{cp} a gagné. Bravo !")
 
-play()
+if __name__ == "__main__":
+    play()
 
 
 
