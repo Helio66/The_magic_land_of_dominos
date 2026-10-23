@@ -170,10 +170,10 @@ def play() :
             for dom in jeu[player] :
                 score[player] += dom.val()
         if score[1]<score[2]:
-            print(f'''Le joueur {1} gagne, avec un score de {score[1]}''')
+            print(f'''Le joueur {1} gagne, avec un score de {score[1]} ! Bravo :)''')
             print(f'''Le joueur {2} a un score de {score[2]}''')
         elif score[1]>score[2]:
-            print(f'''Le joueur {2} gagne, avec un score de {score[2]}''')
+            print(f'''Le joueur {2} gagne, avec un score de {score[2]} ! Bravo :)''')
             print(f'''Le joueur {1} a un score de {score[1]}''')
         else:
             print(f'''Les deux joueurs ont le même score, c'est un match nul. Bravo à tous les deux !''')
