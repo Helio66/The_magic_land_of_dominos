@@ -106,6 +106,7 @@ def remove(d, pile):
 
 def play() :
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
+    win = False
     if cp == 1 :
         current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
         remove(biggest_domino, jeu_p1)
@@ -114,7 +115,8 @@ def play() :
         current_game = Chain(biggest_domino)
         remove(biggest_domino, jeu_p2)
         cp = 1
-
+    while not win :
+        if can_play()
 
 
 
