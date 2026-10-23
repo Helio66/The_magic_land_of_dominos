@@ -96,7 +96,7 @@ def playable_dominos(jeu_p, plateau) :
     for d in jeu_p :
         dom = d.t()
         if can_play([d], plateau): #cela va nous dire si on peut jouer le domino d
-            playable.append(dom)
+            playable.append(d)
     return playable
 
 def remove(d, pile):
@@ -124,14 +124,14 @@ def play() :
             print(f'''c'est au joueur {cp} de jouer.''')
             print(f'''le plateau actuel est {current_game.plateau()}''')
             playable = playable_dominos(jeu[cp], current_game)
-            print(f'''vous pouvez jouer les dominos suivants : {playable}''' )
+            print(f'''vous pouvez jouer les dominos suivants : {[d.t() for d in playable]}''' )
             play_d=int(input("Entrez l'indice du domino à jouer : ")) #input pour pouvoir entrer une question et une reponse de l'user. on precise int psk ca renvoie forcement une chaine de caractere
             playable_left = False
             playable_right = False
             cd = playable[play_d]
-            if playable[play_d][0] == current_game.ex()[0] or playable[play_d][1]== current_game.ex()[0] :
+            if playable[play_d].t()[0] == current_game.ex()[0] or playable[play_d].t()[1]== current_game.ex()[0] :
                 playable_left = True
-            if playable[play_d][0] == current_game.ex()[1] or playable[play_d][1] == current_game.ex()[1]:
+            if playable[play_d].t()[0] == current_game.ex()[1] or playable[play_d].t()[1] == current_game.ex()[1]:
                 playable_right = True
             if playable_left and playable_right :
                 side=input("De quel côté du plateau voulez vous le jouer (right or left)? ")
