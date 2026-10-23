@@ -21,6 +21,8 @@ class Chain: #jeu en cours
         self.left=d.t()[0] #valeur du domino tt a gauche
     def ex(self):
         return self.left, self.right
+    def plateau(self):
+        return [d.t() for d in self.c]
     def push(self, d:Domino, ex:str): #pour effectuer un nouveau coup
         if ex=='right': #si on peut jouer sur le domino de droite
             self.c.append(d) #on ajt ce domino au jeu
@@ -117,8 +119,13 @@ def play() :
         remove(biggest_domino, jeu_p2)
         cp = 1
     while not win :
-        if can_play(jeu[cp], current_game):
-    
+        if can_play(jeu[cp], current_game) :
+            print(f'''c'est au joueur {cp} de jouer.''')
+            print(f'''le plateau actuel est {current_game}''')
+            print(f'''vous pouvez jouer les dominos suivants : {playable_dominos(jeu[cp], current_game)}''' )
+
+
+
 
 
 
