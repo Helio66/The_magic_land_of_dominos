@@ -76,7 +76,7 @@ class TestChain(unittest.TestCase):
         self.assertEqual(self.chaine.plateau(), [(2, 3), (3, 6)])
         self.assertEqual(self.chaine.ex(), (2, 6))
         self.chaine.push(Domino((5, 2)), 'left')
-        self.assertEqual(self.chaine.plateau(), [(5, 2), (2, 3)])
+        self.assertEqual(self.chaine.plateau(), [(5, 2), (2, 3), (3,6)])
         self.assertEqual(self.chaine.ex(), (5, 3))
         self.chaine.push(Domino((3, 4)), 'right')
         self.chaine.push(Domino((1, 2)), 'left')
