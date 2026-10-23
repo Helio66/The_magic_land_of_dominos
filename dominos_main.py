@@ -121,7 +121,7 @@ def play() :
     while not win :
         if can_play(jeu[cp], current_game) :
             print(f'''c'est au joueur {cp} de jouer.''')
-            print(f'''le plateau actuel est {current_game}''')
+            print(f'''le plateau actuel est {current_game.plateau()}''')
             print(f'''vous pouvez jouer les dominos suivants : {playable_dominos(jeu[cp], current_game)}''' )
 
 
