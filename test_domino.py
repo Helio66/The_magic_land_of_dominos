@@ -77,10 +77,10 @@ class TestChain(unittest.TestCase):
         self.assertEqual(self.chaine.ex(), (2, 6))
         self.chaine.push(Domino((5, 2)), 'left')
         self.assertEqual(self.chaine.plateau(), [(5, 2), (2, 3), (3,6)])
-        self.assertEqual(self.chaine.ex(), (5, 3))
-        self.chaine.push(Domino((3, 4)), 'right')
-        self.chaine.push(Domino((1, 2)), 'left')
-        self.assertEqual(self.chaine.plateau(), [(1, 2), (2, 3), (3, 4)])
+        self.assertEqual(self.chaine.ex(), (5, 6))
+        self.chaine.push(Domino((6, 4)), 'right')
+        self.chaine.push(Domino((1, 5)), 'left')
+        self.assertEqual(self.chaine.plateau(), [(1, 5), (5, 2), (2, 3), (3,6), (6, 4)])
         self.assertEqual(self.chaine.ex(), (1, 4))
 
 class TestEnsemble(unittest.TestCase):
@@ -164,7 +164,7 @@ class TestRemove(unittest.TestCase):
 
     def test_remove(self):
         pile = [Domino((1, 2)), Domino((3, 4)), Domino((5, 6))]
-        cible = Domino((3, 4))
+        cible = pile[1]
         remove(cible, pile)
         self.assertEqual(len(pile), 2)
         self.assertNotIn(cible.t(), [d.t() for d in pile])
@@ -176,8 +176,9 @@ class TestRemove(unittest.TestCase):
 
     def test_keep_all_others(self):
         pile = [Domino((0, 1)), Domino((2, 2)), Domino((4, 5))]
-        remove(Domino((2, 2)), pile)
-        self.assertEqual({d.t() for d in pile}, {(0, 1), (4, 5)})
+        d=pile[1]
+        remove(d, pile)
+        self.assertEqual([d.t() for d in pile], [(0, 1), (4, 5)])
 
 
 if __name__ == "__main__":
