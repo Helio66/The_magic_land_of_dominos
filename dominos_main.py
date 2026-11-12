@@ -99,18 +99,14 @@ def remove(d, pile):
             break #on sort de la boucle pour eviter des recursions inutiles qd on a trv d
 
 def play() :
-    jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
+    np = int(input("Entrez le nombre de joueurs: "))
+    jeu, talon, cp, biggest_domino = distribute(ensemble, np)
     win = False
     win_stop=False #winstop = True si le talon est vide et le cp peut pas jouer
-    jeu={1:jeu_p1, 2:jeu_p2}
-    if cp == 1 :
-        current_game: Chain = Chain(biggest_domino)#chain prend en argument le premier domino de la chaine
-        remove(biggest_domino, jeu_p1)
-        cp = 2
-    else :
-        current_game = Chain(biggest_domino)
-        remove(biggest_domino, jeu_p2)
-        cp = 1
+    current_game: Chain = Chain(biggest_domino) #chain prend en argument le premier domino de la chaine
+    remove(biggest_domino, jeu[cp])
+    cp = cp%np + 1
+
     while not win :
         if can_play(jeu[cp], current_game) : #dans ce cas, le jeu se termine si le joueur n'a plus de domino
             print(f'''c'est au joueur {cp} de jouer.''')
@@ -143,7 +139,7 @@ def play() :
             else :
                 if win_stop:
                     win_stop=False
-                cp = cp%2 + 1
+                cp = cp%np + 1
         else:
             print(f'''le joueur {cp} ne peut pas jouer''')
             if win_stop:
