@@ -239,34 +239,39 @@ def play_ia():
                     win_stop = 0
                     cp = cp % np + 1
             else :
+                playable_dom_ia = playable_dominos(jeu[cp], current_game)
                 if np == 2 :
-                    playable_dom_ia = playable_dominos(jeu[cp], current_game)
                     if difficulte == 'aleatoire' :
                         play_d = choose_alea(playable_dom_ia)
                     elif difficulte == 'gloutonne' :
                         play_d = choose_naive(playable_dom_ia)
-                    playable_left = False
-                    playable_right = False
-                    cd = playable_dom_ia[play_d]
-                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
-                        0]:
-                        playable_left = True
-                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
-                        1]:
-                        playable_right = True
-                    if playable_left and playable_right:
-                        sides=['right', 'left']
-                        side = sides[random.randint(0,1)]
-                    else:
-                        side = 'left' if playable_left else 'right'
-                    if side == 'right':
-                        if cd.t()[0] != current_game.ex()[1]:
-                            cd.inv()
-                    else:
-                        if cd.t()[1] != current_game.ex()[0]:
-                            cd.inv()
-                    current_game.push(cd, side)
-                    remove(cd, jeu[cp])
+                elif np == 3 :
+                    if cp == 2:
+                        play_d = choose_alea(playable_dom_ia)
+                    elif cp == 3 :
+                        play_d = choose_naive(playable_dom_ia)
+                playable_left = False
+                playable_right = False
+                cd = playable_dom_ia[play_d]
+                if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
+                    0]:
+                    playable_left = True
+                if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
+                    1]:
+                    playable_right = True
+                if playable_left and playable_right:
+                    sides=['right', 'left']
+                    side = sides[random.randint(0,1)]
+                else:
+                    side = 'left' if playable_left else 'right'
+                if side == 'right':
+                    if cd.t()[0] != current_game.ex()[1]:
+                        cd.inv()
+                else:
+                    if cd.t()[1] != current_game.ex()[0]:
+                        cd.inv()
+                current_game.push(cd, side)
+                remove(cd, jeu[cp])
 
         else:
             print(f'''le joueur {cp} ne peut pas jouer''')
