@@ -225,19 +225,6 @@ def play_ia():
                     side = input("De quel côté du plateau voulez vous le jouer (right or left)? ")
                 else:
                     side = 'left' if playable_left else 'right'
-                if side == 'right':
-                    if cd.t()[0] != current_game.ex()[1]:
-                        cd.inv()
-                else:
-                    if cd.t()[1] != current_game.ex()[0]:
-                        cd.inv()
-                current_game.push(cd, side)
-                remove(cd, jeu[cp])
-                if not jeu[cp]:  # si la liste est vide
-                    win = True
-                else:
-                    win_stop = 0
-                    cp = cp % np + 1
             else :
                 playable_dom_ia = playable_dominos(jeu[cp], current_game)
                 if np == 2 :
@@ -264,15 +251,19 @@ def play_ia():
                     side = sides[random.randint(0,1)]
                 else:
                     side = 'left' if playable_left else 'right'
-                if side == 'right':
-                    if cd.t()[0] != current_game.ex()[1]:
-                        cd.inv()
-                else:
-                    if cd.t()[1] != current_game.ex()[0]:
-                        cd.inv()
-                current_game.push(cd, side)
-                remove(cd, jeu[cp])
-
+            if side == 'right':
+                if cd.t()[0] != current_game.ex()[1]:
+                    cd.inv()
+            else:
+                if cd.t()[1] != current_game.ex()[0]:
+                    cd.inv()
+            current_game.push(cd, side)
+            remove(cd, jeu[cp])
+            if not jeu[cp]:  # si la liste est vide
+                win = True
+            else:
+                win_stop = 0
+                cp = cp % np + 1
         else:
             print(f'''le joueur {cp} ne peut pas jouer''')
             if win_stop == np - 1:
