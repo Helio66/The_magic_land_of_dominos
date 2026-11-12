@@ -190,6 +190,7 @@ def play_human() :
 
 def play_ia():
     np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
+    difficulte=''
     if np == 2 :
         difficulte = input("Choisissez d'affronter une IA aléatoire ou gloutonne : ")
         while not (difficulte in ["aléatoire", "gloutonne"]):
@@ -225,6 +226,7 @@ def play_ia():
                     side = 'left' if playable_left else 'right'
             else :
                 playable_dom_ia = playable_dominos(jeu[cp], current_game)
+                play_d=-1
                 if np == 2 :
                     if difficulte == 'aléatoire' :
                         play_d = choose_alea(playable_dom_ia)
