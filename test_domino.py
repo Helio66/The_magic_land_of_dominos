@@ -1,15 +1,3 @@
-"""
-Tests unitaires pour dominos_main.py
-Lancement :  python -m unittest test_dominos.py -v
-
-IMPORTANT : dans dominos_main.py, il faut remplacer le dernier appel
-    play()
-par
-    if __name__ == "__main__":
-        play()
-Sinon l'import du module lance une partie interactive et les tests bloquent.
-"""
-
 import random
 import unittest
 
