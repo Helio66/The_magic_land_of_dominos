@@ -36,19 +36,31 @@ class Chain: #jeu en cours
 
 ensemble : list[Domino] = [Domino((i,j)) for i in range(7) for j in range(i,7)]
 
-def distribute(jeu) :
-    jeu_p1 = []
-    jeu_p2 = []
+def distribute(jeu, np) :
+    #jeu_p1 = []
+    #jeu_p2 = []
+    jeu_p={} #jeu_p[i] est le jeu du ieme joueur
     talon = []
     random.shuffle(jeu)  #melange le jeu a chaque fois
     biggest_domino=jeu[0]
     beginning_p=1
     db=jeu[0].db()
-    for i in range(7) :
-        jeu_p1.append(jeu[i])
-        jeu_p2.append(jeu[7+i])
-        talon.append(jeu[14+i])
-        talon.append(jeu[21+i])
+    taille_jeu=len(jeu)//(np+1)
+    for i in range(len(jeu)//(np+1)): #on repartit les cartes. le reste est mis dans le talon
+        for j in range(np):
+            if j in jeu_p:
+                jeu_p[j].append(jeu[j*taille_jeu +i])
+            else:
+                jeu_p[j]=[jeu[j*taille_jeu +i]]
+        talon.append(jeu[np * taille_jeu + i])
+    if len(jeu)%(np+1) !=0 :
+        for i in range(len(jeu)%(np+1)) :
+            talon.append((np+1)*taille_jeu + i)
+        '''for i in range(7) :
+            jeu_p1.append(jeu[i])
+            jeu_p2.append(jeu[7+i])
+            talon.append(jeu[14+i])
+            talon.append(jeu[21+i])''' #avant de jouer avec plus de 2 joueurs
         if db:
             if jeu[i].db():
                 if jeu[i].t()[0]>biggest_domino.t()[0]:
