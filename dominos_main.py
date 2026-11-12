@@ -48,10 +48,10 @@ def distribute(jeu, np) :
     taille_jeu=len(jeu)//(np+1)
     for i in range(len(jeu)//(np+1)): #on repartit les cartes. le reste est mis dans le talon
         for j in range(np):
-            if j in jeu_p:
-                jeu_p[j].append(jeu[j*taille_jeu +i])
+            if j+1 in jeu_p:
+                jeu_p[j+1].append(jeu[j*taille_jeu +i])
             else:
-                jeu_p[j]=[jeu[j*taille_jeu +i]]
+                jeu_p[j+1]=[jeu[j*taille_jeu +i]]
             if db:
                 if jeu[j*taille_jeu+i].db():
                     if jeu[j*taille_jeu+i].t()[0] > biggest_domino.t()[0]:
@@ -101,6 +101,7 @@ def remove(d, pile):
 def play() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
+    print(jeu)
     win = False
     win_stop=0 #winstop = True si le talon est vide et le cp peut pas jouer
     current_game: Chain = Chain(biggest_domino) #chain prend en argument le premier domino de la chaine
@@ -174,7 +175,7 @@ def play() :
         else :
             print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
     else:
-        print(f"{cp} a gagné. Bravo !")
+        print(f"Le joueur {cp} a gagné. Bravo !")
 
 if __name__ == "__main__":
     play()
