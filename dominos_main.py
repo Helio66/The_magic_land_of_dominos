@@ -111,10 +111,9 @@ def choose_naive(playable_dominos) :
     return domino_max
 
 
-def play() :
+def play_human() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
-    print(jeu)
     win = False
     win_stop=0 #winstop = True si le talon est vide et le cp peut pas jouer
     current_game: Chain = Chain(biggest_domino) #chain prend en argument le premier domino de la chaine
@@ -189,6 +188,121 @@ def play() :
             print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
     else:
         print(f"Le joueur {cp} a gagné. Bravo !")
+
+
+def play_ia():
+    np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
+    if np == 2 :
+        difficulte = input("Choisissez d'affronter une IA aléatoire ou gloutonne : ")
+        while not (difficulte in ["aléatoire", "gloutonne"]):
+            print("ce mode de jeu n'existe pas")
+            difficulte = input("Choisissez entre une IA aléatoire ou gloutonne : ")
+
+    jeu, talon, cp, biggest_domino = distribute(ensemble, np)
+    win = False
+    win_stop = 0  # winstop = True si le talon est vide et le cp peut pas jouer
+    current_game: Chain = Chain(biggest_domino)  # chain prend en argument le premier domino de la chaine
+    remove(biggest_domino, jeu[cp])
+    cp = cp % np + 1
+    while not win:
+        if can_play(jeu[cp], current_game):  # dans ce cas, le jeu se termine si le joueur n'a plus de domino
+            if cp == 1 :
+                print(f'''c'est au joueur {cp} de jouer.''')
+                print(f'''le plateau actuel est {current_game.plateau()}''')
+                print(f'''votre jeu actuel est {[d.t() for d in jeu[cp]]}''')
+                playable = playable_dominos(jeu[cp], current_game)
+                print(f'''vous pouvez jouer les dominos suivants : {[d.t() for d in playable]}''')
+                play_d = int(input(
+                    "Entrez l'indice du domino à jouer : "))  # input pour pouvoir entrer une question et une reponse de l'user. on precise int psk ca renvoie forcement une chaine de caractere
+                playable_left = False
+                playable_right = False
+                cd = playable[play_d]
+                if playable[play_d].t()[0] == current_game.ex()[0] or playable[play_d].t()[1] == current_game.ex()[0]:
+                    playable_left = True
+                if playable[play_d].t()[0] == current_game.ex()[1] or playable[play_d].t()[1] == current_game.ex()[1]:
+                    playable_right = True
+                if playable_left and playable_right:
+                    side = input("De quel côté du plateau voulez vous le jouer (right or left)? ")
+                else:
+                    side = 'left' if playable_left else 'right'
+                if side == 'right':
+                    if cd.t()[0] != current_game.ex()[1]:
+                        cd.inv()
+                else:
+                    if cd.t()[1] != current_game.ex()[0]:
+                        cd.inv()
+                current_game.push(cd, side)
+                remove(cd, jeu[cp])
+                if not jeu[cp]:  # si la liste est vide
+                    win = True
+                else:
+                    win_stop = 0
+                    cp = cp % np + 1
+            else :
+                if np == 2 :
+                    playable_dom_ia = playable_dominos(jeu[cp], current_game)
+                    if difficulte == 'aleatoire' :
+                        cd = choose_alea(playable_dom_ia)
+                    elif difficulte == 'gloutonne' :
+                        cd = choose_naive(playable_dom_ia)
+                    playable_left = False
+                    playable_right = False
+                    cd = playable[play_d]
+                    if playable[play_d].t()[0] == current_game.ex()[0] or playable[play_d].t()[1] == current_game.ex()[
+                        0]:
+                        playable_left = True
+                    if playable[play_d].t()[0] == current_game.ex()[1] or playable[play_d].t()[1] == current_game.ex()[
+                        1]:
+                        playable_right = True
+                    if playable_left and playable_right:
+                        side = input("De quel côté du plateau voulez vous le jouer (right or left)? ")
+                    else:
+                        side = 'left' if playable_left else 'right'
+                    if side == 'right':
+                        if cd.t()[0] != current_game.ex()[1]:
+                            cd.inv()
+                    else:
+                        if cd.t()[1] != current_game.ex()[0]:
+                            cd.inv()
+                    current_game.push(cd, side)
+                    remove(cd, jeu[cp])
+        else:
+            print(f'''le joueur {cp} ne peut pas jouer''')
+            if win_stop == np - 1:
+                win = True
+            else:
+                if talon:
+                    dtemp = talon.pop()
+                    jeu[cp].append(dtemp)
+                    print(f'''Vous avez pioché le domino : {dtemp.t()}''')
+                else:
+                    win_stop += 1
+                cp = cp % np + 1
+    if win_stop:
+        score = {}
+        joueur_min = []
+        score_min = 0
+        for j in range(np):
+            score[j + 1] = 0
+        for player in score:
+            for dom in jeu[player]:
+                score[player] += dom.val()
+            if player == 1:
+                score_min = score[1]
+                joueur_min = [1]
+            else:
+                if score[player] < score_min:
+                    score_min = score[player]
+                    joueur_min = [player]
+                elif score[player] == score_min:
+                    joueur_min.append(player)
+        if len(joueur_min) == 1:
+            print(f'''Le joueur {joueur_min[0]} gagne, avec un score de {score_min} ! Bravo :)''')
+        else:
+            print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
+    else:
+        print(f"Le joueur {cp} a gagné. Bravo !")
+
 
 if __name__ == "__main__":
     play()
