@@ -52,6 +52,20 @@ def distribute(jeu, np) :
                 jeu_p[j].append(jeu[j*taille_jeu +i])
             else:
                 jeu_p[j]=[jeu[j*taille_jeu +i]]
+            if db:
+                if jeu[j*taille_jeu+i].db():
+                    if jeu[j*taille_jeu+i].t()[0] > biggest_domino.t()[0]:
+                        biggest_domino = jeu[j*taille_jeu+i]
+                        beginning_p = j+1
+            else:
+                if jeu[j*taille_jeu+i].db():
+                    biggest_domino = jeu[j*taille_jeu+i]
+                    beginning_p = j
+                    db = True
+                else:
+                    if jeu[j*taille_jeu+i].val() > biggest_domino.val():
+                        biggest_domino = jeu[j*taille_jeu+i]
+                        beginning_p = j
         talon.append(jeu[np * taille_jeu + i])
     if len(jeu)%(np+1) !=0 :
         for i in range(len(jeu)%(np+1)) :
@@ -60,7 +74,7 @@ def distribute(jeu, np) :
             jeu_p1.append(jeu[i])
             jeu_p2.append(jeu[7+i])
             talon.append(jeu[14+i])
-            talon.append(jeu[21+i])''' #avant de jouer avec plus de 2 joueurs
+            talon.append(jeu[21+i]) #avant de jouer avec plus de 2 joueurs
         if db:
             if jeu[i].db():
                 if jeu[i].t()[0]>biggest_domino.t()[0]:
@@ -89,8 +103,8 @@ def distribute(jeu, np) :
                     beginning_p = 1
                 if jeu[i+7].val()>biggest_domino.val():
                     biggest_domino=jeu[i+7]
-                    beginning_p=2
-    return jeu_p1, jeu_p2, talon, beginning_p, biggest_domino
+                    beginning_p=2'''
+    return jeu_p, talon, beginning_p, biggest_domino
 
 #print(distribute(ensemble))
 
