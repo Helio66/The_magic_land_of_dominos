@@ -70,40 +70,6 @@ def distribute(jeu, np) :
     if len(jeu)%(np+1) !=0 :
         for i in range(len(jeu)%(np+1)) :
             talon.append((np+1)*taille_jeu + i)
-        '''for i in range(7) :
-            jeu_p1.append(jeu[i])
-            jeu_p2.append(jeu[7+i])
-            talon.append(jeu[14+i])
-            talon.append(jeu[21+i]) #avant de jouer avec plus de 2 joueurs
-        if db:
-            if jeu[i].db():
-                if jeu[i].t()[0]>biggest_domino.t()[0]:
-                    biggest_domino=jeu[i]
-                    beginning_p=1
-            if jeu[i+7].db():
-                if jeu[i+7].t()[0] > biggest_domino.t()[0]:
-                    biggest_domino = jeu[i+7]
-                    beginning_p = 2
-        else:
-            if jeu[i].db():
-                biggest_domino=jeu[i]
-                beginning_p=1
-                db=True
-            if jeu[i+7].db() and db:
-                if jeu[i+7].t()[0] > biggest_domino.t()[0]:
-                    biggest_domino = jeu[i+7]
-                    beginning_p = 2
-            if jeu[i+7].db() and not db:
-                biggest_domino = jeu[i + 7]
-                beginning_p = 2
-                db=True
-            if not db:
-                if jeu[i].val()>biggest_domino.val():
-                    biggest_domino = jeu[i]
-                    beginning_p = 1
-                if jeu[i+7].val()>biggest_domino.val():
-                    biggest_domino=jeu[i+7]
-                    beginning_p=2'''
     return jeu_p, talon, beginning_p, biggest_domino
 
 #print(distribute(ensemble))
