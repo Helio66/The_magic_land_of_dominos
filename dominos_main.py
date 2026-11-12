@@ -153,6 +153,8 @@ def play() :
                 cp = cp%np + 1
     if win_stop :
         score= {}
+        joueur_min=[]
+        score_min=0
         for j in range(np) :
             score[j+1]=0
         for player in score :
