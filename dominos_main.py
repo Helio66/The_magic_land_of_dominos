@@ -101,7 +101,15 @@ def remove(d, pile):
 def choose_alea(playable_dominos):
     return random.randint(0,len(playable_dominos)-1)
 
-def choose_naive()
+def choose_naive(playable_dominos) :
+    valeur_max = 0
+    domino_max = 0
+    for i in range(len(playable_dominos)) :
+        if valeur_max < playable_dominos[i].val() :
+            valeur_max = playable_dominos[i].val()
+            domino_max = i
+    return domino_max
+
 
 def play() :
     np = int(input("Entrez le nombre de joueurs: "))
