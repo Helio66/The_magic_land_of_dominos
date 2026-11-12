@@ -69,7 +69,7 @@ def distribute(jeu, np) :
         talon.append(jeu[np * taille_jeu + i])
     if len(jeu)%(np+1) !=0 :
         for i in range(len(jeu)%(np+1)) :
-            talon.append((np+1)*taille_jeu + i)
+            talon.append(jeu[(np+1)*taille_jeu + i])
     return jeu_p, talon, beginning_p, biggest_domino
 
 #print(distribute(ensemble))
@@ -226,7 +226,7 @@ def play_ia():
             else :
                 playable_dom_ia = playable_dominos(jeu[cp], current_game)
                 if np == 2 :
-                    if difficulte == 'aleatoire' :
+                    if difficulte == 'aléatoire' :
                         play_d = choose_alea(playable_dom_ia)
                     elif difficulte == 'gloutonne' :
                         play_d = choose_naive(playable_dom_ia)
@@ -238,6 +238,7 @@ def play_ia():
                 playable_left = False
                 playable_right = False
                 cd = playable_dom_ia[play_d]
+                print(f"le joueur {cp} a joué le domino {cd.t()}")
                 if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
                     0]:
                     playable_left = True
@@ -270,7 +271,8 @@ def play_ia():
                 if talon:
                     dtemp = talon.pop()
                     jeu[cp].append(dtemp)
-                    print(f'''Vous avez pioché le domino : {dtemp.t()}''')
+                    if cp==1:
+                        print(f'''Vous avez pioché le domino : {dtemp.t()}''')
                 else:
                     win_stop += 1
                 cp = cp % np + 1
