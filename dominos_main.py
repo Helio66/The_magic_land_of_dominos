@@ -98,6 +98,11 @@ def remove(d, pile):
             pile.pop()
             break #on sort de la boucle pour eviter des recursions inutiles qd on a trv d
 
+def choose_alea(playable_dominos):
+    return random.randint(0,len(playable_dominos)-1)
+
+def choose_naive()
+
 def play() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
