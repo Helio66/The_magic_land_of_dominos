@@ -87,7 +87,6 @@ def can_play(jeu_p, plateau) :
 def playable_dominos(jeu_p, plateau) :
     playable = []
     for d in jeu_p :
-        dom = d.t()
         if can_play([d], plateau): #cela va nous dire si on peut jouer le domino d
             playable.append(d)
     return playable
