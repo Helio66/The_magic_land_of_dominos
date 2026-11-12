@@ -152,18 +152,25 @@ def play() :
                     win_stop+=1
                 cp = cp%np + 1
     if win_stop :
-        score= {1 : 0, 2 : 0}
+        score= {}
+        for j in range(np) :
+            score[j+1]=0
         for player in score :
             for dom in jeu[player] :
                 score[player] += dom.val()
-        if score[1]<score[2]:
-            print(f'''Le joueur {1} gagne, avec un score de {score[1]} ! Bravo :)''')
-            print(f'''Le joueur {2} a un score de {score[2]}''')
-        elif score[1]>score[2]:
-            print(f'''Le joueur {2} gagne, avec un score de {score[2]} ! Bravo :)''')
-            print(f'''Le joueur {1} a un score de {score[1]}''')
-        else:
-            print(f'''Les deux joueurs ont le même score, c'est un match nul. Bravo à tous les deux !''')
+            if player==1:
+                score_min = score[1]
+                joueur_min = [1]
+            else :
+                if score[player] < score_min :
+                    score_min = score[player]
+                    joueur_min = [player]
+                elif score[player] == score_min :
+                    joueur_min.append(player)
+        if len(joueur_min) == 1 :
+            print(f'''Le joueur {joueur_min[0]} gagne, avec un score de {score_min} ! Bravo :)''')
+        else :
+            print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
     else:
         print(f"{cp} a gagné. Bravo !")
 
