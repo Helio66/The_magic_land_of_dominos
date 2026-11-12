@@ -110,7 +110,6 @@ def choose_naive(playable_dominos) :
             domino_max = i
     return domino_max
 
-
 def play_human() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
@@ -188,7 +187,6 @@ def play_human() :
             print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
     else:
         print(f"Le joueur {cp} a gagné. Bravo !")
-
 
 def play_ia():
     np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
@@ -301,6 +299,12 @@ def play_ia():
     else:
         print(f"Le joueur {cp} a gagné. Bravo !")
 
+def play():
+    style=int(input("Voulez-vous jouer contre un humain ou une ia (enter 0 for human and 1 for AI)? "))
+    if style==0:
+        play_human()
+    else :
+        play_ia()
 
 if __name__ == "__main__":
     play()
