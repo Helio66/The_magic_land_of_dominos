@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from dominos_main import (
+from dominos_basics import (
     Domino,
     Chain,
     distribute,
