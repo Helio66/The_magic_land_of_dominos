@@ -102,7 +102,7 @@ def play() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
     win = False
-    win_stop=False #winstop = True si le talon est vide et le cp peut pas jouer
+    win_stop=0 #winstop = True si le talon est vide et le cp peut pas jouer
     current_game: Chain = Chain(biggest_domino) #chain prend en argument le premier domino de la chaine
     remove(biggest_domino, jeu[cp])
     cp = cp%np + 1
@@ -137,12 +137,11 @@ def play() :
             if not jeu[cp]: #si la liste est vide
                 win = True
             else :
-                if win_stop:
-                    win_stop=False
+                win_stop=0
                 cp = cp%np + 1
         else:
             print(f'''le joueur {cp} ne peut pas jouer''')
-            if win_stop:
+            if win_stop==np-1:
                 win=True
             else:
                 if talon:
@@ -150,8 +149,8 @@ def play() :
                     jeu[cp].append(dtemp)
                     print(f'''Vous avez pioché le domino : {dtemp.t()}''')
                 else:
-                    win_stop=True
-                cp = cp%2 + 1
+                    win_stop+=1
+                cp = cp%np + 1
     if win_stop :
         score= {1 : 0, 2 : 0}
         for player in score :
