@@ -242,20 +242,21 @@ def play_ia():
                 if np == 2 :
                     playable_dom_ia = playable_dominos(jeu[cp], current_game)
                     if difficulte == 'aleatoire' :
-                        cd = choose_alea(playable_dom_ia)
+                        play_d = choose_alea(playable_dom_ia)
                     elif difficulte == 'gloutonne' :
-                        cd = choose_naive(playable_dom_ia)
+                        play_d = choose_naive(playable_dom_ia)
                     playable_left = False
                     playable_right = False
-                    cd = playable[play_d]
-                    if playable[play_d].t()[0] == current_game.ex()[0] or playable[play_d].t()[1] == current_game.ex()[
+                    cd = playable_dom_ia[play_d]
+                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
                         0]:
                         playable_left = True
-                    if playable[play_d].t()[0] == current_game.ex()[1] or playable[play_d].t()[1] == current_game.ex()[
+                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
                         1]:
                         playable_right = True
                     if playable_left and playable_right:
-                        side = input("De quel côté du plateau voulez vous le jouer (right or left)? ")
+                        sides=['right', 'left']
+                        side = sides[random.randint(0,1)]
                     else:
                         side = 'left' if playable_left else 'right'
                     if side == 'right':
@@ -266,6 +267,7 @@ def play_ia():
                             cd.inv()
                     current_game.push(cd, side)
                     remove(cd, jeu[cp])
+
         else:
             print(f'''le joueur {cp} ne peut pas jouer''')
             if win_stop == np - 1:
