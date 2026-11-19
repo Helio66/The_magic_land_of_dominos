@@ -110,25 +110,114 @@ def choose_naive(playable_dominos) :
             domino_max = i
     return domino_max #retourne l'indice du domino pouvant etre joué
 
-def minmax(jeu, plateau, max_prof, prof,cp, np)#Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
-    if cas de base:
-        pass
+def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
+    if len(jeu[cp])==1 and can_play(jeu[cp], plateau):
+        play_d=jeu[cp]
+        if play_d.t()[0]==plateau.ex()[1] or play_d.t()[1]==plateau.ex()[1]:
+            side='right'
+        elif play_d.t()[0]==plateau.ex()[0] or play_d.t()[1]==plateau.ex()[0]:
+            side='left'
+        if cp==j_ia:
+            return (float('-inf'), 0, side)
+        else:
+            return (float('inf'), 0, side)
+    elif max_prof==prof:
+        s=0
+        for d in jeu[j_ia]:
+            s+=d.val()
+        return (s, 0, 'right')
+    if win_stop==np-1:
+        score={}
+        for i in range(np):
+            s=0
+            for d in jeu[i+1]:
+                s+=d.val()
+            score[i+1]=s
+        mini=1
+        for k in score:
+            if score[k]<score[mini]:
+                mini=k
+        if mini==j_ia:
+            return (float('-inf'), 0, 'right')
+        else:
+            return (float('inf'), 0, 'right')
     else :
-        playable=playable_dominos(jeu[cp], plateau)
-        if cp==1:
-            maxi=0
-            for cd in range(len(playable)):
-                play_d=playable[cd]
-                remove(play_d, jeu[cp])
-                if play_d.t()[0]==plateau.ex()[1] :
-                    score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof+1, (cp%np)+1, np)
-                elif play_d.t()[1] == plateau.ex()[1]:
-                    score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof + 1, (cp % np) + 1, np)
-                if play_d.t()[0]==plateau.ex()[0] :
-                    score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof+1, (cp%np)+1, np)
-                elif play_d.t()[1] == plateau.ex()[0]:
-                    score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof + 1, (cp % np) + 1, np)
-            return max(minmax(jeu, plateau;append(1d), max_prof, prof+1, cp, np))
+        if can_play(jeu[cp], plateau):
+            win_stop=0
+            playable=playable_dominos(jeu[cp], plateau)
+            if cp==j_ia:
+                mini=(0, 0, '')
+                for cd in range(len(playable)):
+                    play_d=playable[cd]
+                    right, left=False, False
+                    remove(play_d, jeu[cp])
+                    if play_d.t()[0]==plateau.ex()[1] :
+                        right=True
+                        score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                    elif play_d.t()[1] == plateau.ex()[1]:
+                        right = True
+                        score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                    if play_d.t()[0]==plateau.ex()[0] :
+                        left = True
+                        score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                    elif play_d.t()[1] == plateau.ex()[0]:
+                        left = True
+                        score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                    if cd==0:
+                        if right:
+                            mini=(score_right[0],cd,'right')
+                            if left and score_left[0]<mini[0]:
+                                mini=(score_left[0], cd, 'left')
+                        else:
+                            mini=(score_left[0],cd,'left')
+                    else:
+                        if right and score_right[0]<mini[0]:
+                            mini=(score_right[0], cd, 'right')
+                            if left and score_left[0]<mini[0]:
+                                mini=(score_left[0], cd, 'left')
+                        elif score_left[0] < mini[0]:
+                                mini = (score_left[0], cd, 'left')
+                return mini
+            else:
+                maxi = (0,0,'')
+                for cd in range(len(playable)):
+                    play_d = playable[cd]
+                    right, left = False, False
+                    remove(play_d, jeu[cp])
+                    if play_d.t()[0] == plateau.ex()[1]:
+                        right = True
+                        score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                    elif play_d.t()[1] == plateau.ex()[1]:
+                        right = True
+                        score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof + 1, (cp % np) + 1,np, j_ia, win_stop, talon)
+                    if play_d.t()[0] == plateau.ex()[0]:
+                        left = True
+                        score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                    elif play_d.t()[1] == plateau.ex()[0]:
+                        left = True
+                        score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                    if cd == 0:
+                        if right:
+                            maxi = (score_right[0], cd, 'right')
+                            if left and score_left[0] > maxi[0]:
+                                maxi = (score_left[0], cd, 'left')
+                        else:
+                            maxi = (score_left[0], cd, 'left')
+                    else:
+                        if right and score_right[0] > maxi[0]:
+                            maxi = (score_right[0], cd, 'right')
+                            if left and score_left[0] > maxi[0]:
+                                maxi = (score_left[0], cd, 'left')
+                        elif score_left[0] > maxi[0]:
+                            maxi = (score_left[0], cd, 'left')
+                return maxi
+        else:
+            if talon:
+                dtemp = talon.pop()
+                jeu[cp].append(dtemp)
+            else:
+                win_stop += 1
+            return minmax(jeu, plateau, max_prof, prof+1, cp%np+1, np, j_ia, win_stop, talon)
 
 
 def play_human() :
