@@ -110,6 +110,9 @@ def choose_naive(playable_dominos) :
             domino_max = i
     return domino_max
 
+def minmax():
+
+
 def play_human() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
