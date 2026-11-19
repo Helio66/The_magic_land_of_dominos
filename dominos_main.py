@@ -108,9 +108,16 @@ def choose_naive(playable_dominos) :
         if valeur_max < playable_dominos[i].val() :
             valeur_max = playable_dominos[i].val()
             domino_max = i
-    return domino_max
+    return domino_max #retourne l'indice du domino pouvant etre joué
 
-def minmax():
+def minmax(jeu_ia, plateau, max_prof, prof): #Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
+    if len(jeu_ia) == 1 and can_play(jeu_ia, plateau) :
+        return 0
+    elif prof == max_prof :
+        return
+    else :
+
+
 
 
 def play_human() :
@@ -315,6 +322,3 @@ def play():
 
 if __name__ == "__main__":
     play()
-
-
-
