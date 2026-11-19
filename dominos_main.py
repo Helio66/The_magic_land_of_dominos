@@ -110,14 +110,25 @@ def choose_naive(playable_dominos) :
             domino_max = i
     return domino_max #retourne l'indice du domino pouvant etre joué
 
-def minmax(jeu_ia, plateau, max_prof, prof): #Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
-    if len(jeu_ia) == 1 and can_play(jeu_ia, plateau) :
-        return 0
-    elif prof == max_prof :
-        return
+def minmax(jeu, plateau, max_prof, prof,cp, np)#Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
+    if cas de base:
+        pass
     else :
-
-
+        playable=playable_dominos(jeu[cp], plateau)
+        if cp==1:
+            maxi=0
+            for cd in range(len(playable)):
+                play_d=playable[cd]
+                remove(play_d, jeu[cp])
+                if play_d.t()[0]==plateau.ex()[1] :
+                    score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof+1, (cp%np)+1, np)
+                elif play_d.t()[1] == plateau.ex()[1]:
+                    score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof + 1, (cp % np) + 1, np)
+                if play_d.t()[0]==plateau.ex()[0] :
+                    score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof+1, (cp%np)+1, np)
+                elif play_d.t()[1] == plateau.ex()[0]:
+                    score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof + 1, (cp % np) + 1, np)
+            return max(minmax(jeu, plateau;append(1d), max_prof, prof+1, cp, np))
 
 
 def play_human() :
