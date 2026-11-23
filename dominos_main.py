@@ -62,12 +62,12 @@ def distribute(jeu, np) :
             else:
                 if jeu[j*taille_jeu+i].db():
                     biggest_domino = jeu[j*taille_jeu+i]
-                    beginning_p = j
+                    beginning_p = j+1
                     db = True
                 else:
                     if jeu[j*taille_jeu+i].val() > biggest_domino.val():
                         biggest_domino = jeu[j*taille_jeu+i]
-                        beginning_p = j
+                        beginning_p = j+1
         talon.append(jeu[np * taille_jeu + i])
     if len(jeu)%(np+1) !=0 :
         for i in range(len(jeu)%(np+1)) :
@@ -276,7 +276,7 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
                             mini=(score_right[0],cd,'right')
                             if left and score_left[0]<mini[0]:
                                 mini=(score_left[0], cd, 'left')
-                        else:
+                        elif left:
                             mini=(score_left[0],cd,'left')
                     else:
                         if right and score_right[0]<mini[0]:
@@ -315,7 +315,7 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
                             maxi = (score_right[0], cd, 'right')
                             if left and score_left[0] > maxi[0]:
                                 maxi = (score_left[0], cd, 'left')
-                        else:
+                        elif left:
                             maxi = (score_left[0], cd, 'left')
                     else:
                         if right and score_right[0] > maxi[0]:
@@ -370,7 +370,7 @@ def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
                 jeu_guess[i+1]=r[i]
             elif i+1>j_ia:
                 jeu_guess[i+1]=r[i-1]
-        result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[len(r)-1])
+        result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[len(r)-1 ])
         k=(result[1], result[2])
         if k in results:
             results[k]+=1
