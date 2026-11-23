@@ -310,6 +310,27 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
                 win_stop += 1
             return minmax(jeu, plateau, max_prof, prof+1, cp%np+1, np, j_ia, win_stop, talon)
 
+def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
+    anonymous = anonymous_dominos(jeu[j_ia], current_game)
+    guesses=guess_repartition_1p(anonymous, len(jeu[j_ia % np + 1]))
+    jeu_guess={}
+    jeu_guess[j_ia]=[d for d in jeu[j_ia]]
+    results={}
+    for r in guesses:
+        jeu_guess[j_ia%np+1]=r[0]
+        result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[1])
+        k=(result[1], result[2])
+        if k in results:
+            results[k]+=1
+        else:
+            results[k]=1
+    maxi=0
+    for k in results:
+        if results[k]>maxi:
+            maxi=results[k]
+            kmax=k
+    return kmax
+
 def play_human() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
@@ -435,9 +456,9 @@ def play_ia():
                     elif difficulte == 'gloutonne' :
                         play_d = choose_naive(playable_dom_ia)
                     elif difficulte == 'minmax':
-                        result = minmax(jeu, current_game, max_prof, 0, cp, np, cp, win_stop, talon)
-                        play_d=result[1]
-                        best_side=result[2]
+                        result = choose_minmax(jeu, current_game, cp, np, max_prof, win_stop)
+                        play_d=result[0]
+                        best_side=result[1]
                 elif np == 3 :
                     if cp == 2:
                         play_d = choose_alea(playable_dom_ia)
