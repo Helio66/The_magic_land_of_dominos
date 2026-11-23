@@ -72,6 +72,44 @@ def distribute(jeu, np) :
             talon.append(jeu[(np+1)*taille_jeu + i])
     return jeu_p, talon, beginning_p, biggest_domino
 
+def merge(l1, l2):
+    l=[]
+    i,j=0,0
+    while i<len(l1) and j<len(l2):
+        if l1[i][0]<l2[j][0]:
+            l.append(l1[i])
+            i+=1
+        elif l1[i][0]>l2[j][0]:
+            l.append(l2[j])
+            j += 1
+        else :
+            if l1[i][1] < l2[j][1]:
+                l.append(l1[i])
+                i += 1
+            else:
+                l.append(l2[j])
+                j += 1
+    while i<len(l1):
+        l.append(l1[i])
+        i+=1
+    while j<len(l2):
+        l.append(l2[j])
+        j+=1
+    return l
+
+def sort(l):
+    if len(l)==1:
+        return l
+    else:
+        l1,l2=[], []
+        i=0
+        for i in range(len(l)//2):
+            l1.append(l[i])
+        while i<len(l):
+            l2.append(l[i])
+            i+=1
+        return merge(sort(l1), sort(l2))
+
 #print(distribute(ensemble))
 
 def can_play(jeu_p, plateau) :
