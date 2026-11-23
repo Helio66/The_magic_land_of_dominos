@@ -97,7 +97,7 @@ def merge(l1, l2):
         j+=1
     return l
 
-def sort(l):
+def fusion_sort(l):
     if len(l)==1:
         return l
     else:
@@ -108,9 +108,30 @@ def sort(l):
         while i<len(l):
             l2.append(l[i])
             i+=1
-        return merge(sort(l1), sort(l2))
+        return merge(fusion_sort(l1), fusion_sort(l2))
 
-#print(distribute(ensemble))
+def guess_repartition_1p(l, taille_jeu):
+    assert taille_jeu<=len(l)
+    tested={}
+    all_guesses=[]
+    for i in range(taille_jeu+1):
+        for j in range(len(l)-taille_jeu+1):
+            if j==0 and i!=0:
+                continue
+            else:
+                associated={}
+                guess, talon=[],[]
+                for k in range(taille_jeu-i):
+                    guess.append(l[k])
+                    associated[l[k]]=1
+                for k in range(i):
+                    guess.append(l[taille_jeu-i+j+k])
+                    associated[l[taille_jeu-i+j+k]]=1
+                for d in l:
+                    if not (d in associated):
+                        talon.append(d)
+                all_guesses.append((guess, talon))
+
 
 def can_play(jeu_p, plateau) :
     left, right = plateau.ex()
