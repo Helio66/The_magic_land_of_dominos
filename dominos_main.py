@@ -15,24 +15,26 @@ class Domino:
             self.d=(self.d[1], self.d[0]) #fct qui inverse les deux positions
 
 class Chain: #jeu en cours
-    def __init__(self, d:Domino):
-        self.c:list[Domino]=[d]
-        self.right=d.t()[1] #valeur du domino tt a droite
-        self.left=d.t()[0] #valeur du domino tt a gauche
+    def __init__(self, ld:list[Domino]):
+        self.c:list[Domino]=[d for d in ld]
+        self.right=ld[len(ld)-1].t()[1] #valeur du domino tt a droite
+        self.left=ld[0].t()[0] #valeur du domino tt a gauche
     def ex(self):
         return self.left, self.right
+    def dom_list(self):
+        return self.c
     def plateau(self):
         return [d.t() for d in self.c]
     def push(self, d:Domino, ex:str): #pour effectuer un nouveau coup
         if ex=='right': #si on peut jouer sur le domino de droite
             self.c.append(d) #on ajt ce domino au jeu
-            self.right=d.d[1] #on considère la nvl valeur de droite
+            self.right=d.t()[1] #on considère la nvl valeur de droite
         else:
             tempo=[d]
             for dom in self.c:
                 tempo.append(dom)
             self.c=[dom for dom in tempo] #on ajoute le domino a gauche
-            self.left=d.d[0] #on considere la nvl valeur de gauche
+            self.left=d.t()[0] #on considere la nvl valeur de gauche
 
 ensemble : list[Domino] = [Domino((i,j)) for i in range(7) for j in range(i,7)]
 
@@ -183,9 +185,13 @@ def choose_naive(playable_dominos) :
             domino_max = i
     return domino_max #retourne l'indice du domino pouvant etre joué
 
-def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
+def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle génère les jeux possibles et retient le domino qui revient le + souvent. pour tt fct recursive, cas de base pour que ca s'arrete
+    plateau=Chain(plateau_true.dom_list())
+    jeu={}
+    for k in jeu_true:
+        jeu[k]=[d for d in jeu_true[k]]
     if len(jeu[cp])==1 and can_play(jeu[cp], plateau):
-        play_d=jeu[cp]
+        play_d=jeu[cp][0]
         if play_d.t()[0]==plateau.ex()[1] or play_d.t()[1]==plateau.ex()[1]:
             side='right'
         elif play_d.t()[0]==plateau.ex()[0] or play_d.t()[1]==plateau.ex()[0]:
@@ -226,16 +232,22 @@ def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle gé
                     remove(play_d, jeu[cp])
                     if play_d.t()[0]==plateau.ex()[1] :
                         right=True
-                        score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                        plateau.push(play_d, 'right')
+                        score_right = minmax(jeu, plateau, max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
                     elif play_d.t()[1] == plateau.ex()[1]:
                         right = True
-                        score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                        play_d.inv()
+                        plateau.push(play_d, 'right')
+                        score_right = minmax(jeu, plateau, max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
                     if play_d.t()[0]==plateau.ex()[0] :
                         left = True
-                        score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                        play_d.inv()
+                        plateau.push(play_d, 'left')
+                        score_left = minmax(jeu, plateau, max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
                     elif play_d.t()[1] == plateau.ex()[0]:
                         left = True
-                        score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
+                        plateau.push(play_d, 'left')
+                        score_left = minmax(jeu, plateau, max_prof, prof+1, (cp%np)+1, np, j_ia, win_stop, talon)
                     if cd==0:
                         if right:
                             mini=(score_right[0],cd,'right')
@@ -248,7 +260,7 @@ def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle gé
                             mini=(score_right[0], cd, 'right')
                             if left and score_left[0]<mini[0]:
                                 mini=(score_left[0], cd, 'left')
-                        elif score_left[0] < mini[0]:
+                        elif left and score_left[0] < mini[0]:
                                 mini = (score_left[0], cd, 'left')
                 return mini
             else:
@@ -259,16 +271,22 @@ def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle gé
                     remove(play_d, jeu[cp])
                     if play_d.t()[0] == plateau.ex()[1]:
                         right = True
-                        score_right = minmax(jeu, plateau.push(play_d, 'right'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                        plateau.push(play_d, 'right')
+                        score_right = minmax(jeu, plateau, max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
                     elif play_d.t()[1] == plateau.ex()[1]:
                         right = True
-                        score_right = minmax(jeu, plateau.push(play_d.inv(), 'right'), max_prof, prof + 1, (cp % np) + 1,np, j_ia, win_stop, talon)
+                        play_d.inv()
+                        plateau.push(play_d, 'right')
+                        score_right = minmax(jeu, plateau, max_prof, prof + 1, (cp % np) + 1,np, j_ia, win_stop, talon)
                     if play_d.t()[0] == plateau.ex()[0]:
                         left = True
-                        score_left = minmax(jeu, plateau.push(play_d.inv(), 'left'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                        play_d.inv()
+                        plateau.push(play_d, 'left')
+                        score_left = minmax(jeu, plateau, max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
                     elif play_d.t()[1] == plateau.ex()[0]:
                         left = True
-                        score_left = minmax(jeu, plateau.push(play_d, 'left'), max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
+                        plateau.push(play_d, 'left')
+                        score_left = minmax(jeu, plateau, max_prof, prof + 1, (cp % np) + 1, np, j_ia, win_stop, talon)
                     if cd == 0:
                         if right:
                             maxi = (score_right[0], cd, 'right')
@@ -281,7 +299,7 @@ def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle gé
                             maxi = (score_right[0], cd, 'right')
                             if left and score_left[0] > maxi[0]:
                                 maxi = (score_left[0], cd, 'left')
-                        elif score_left[0] > maxi[0]:
+                        elif left and score_left[0] > maxi[0]:
                             maxi = (score_left[0], cd, 'left')
                 return maxi
         else:
@@ -297,7 +315,7 @@ def play_human() :
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
     win = False
     win_stop=0 #winstop = True si le talon est vide et le cp peut pas jouer
-    current_game: Chain = Chain(biggest_domino) #chain prend en argument le premier domino de la chaine
+    current_game: Chain = Chain([biggest_domino]) #chain prend en argument le premier domino de la chaine
     remove(biggest_domino, jeu[cp])
     cp = cp%np + 1
 
@@ -374,15 +392,16 @@ def play_ia():
     np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
     difficulte=''
     if np == 2 :
-        difficulte = input("Choisissez d'affronter une IA aléatoire ou gloutonne : ")
-        while not (difficulte in ["aléatoire", "gloutonne"]):
+        difficulte = input("Choisissez d'affronter une IA aléatoire, gloutonne ou minmax : ")
+        while not (difficulte in ["aléatoire", "gloutonne", "minmax"]):
             print("ce mode de jeu n'existe pas")
-            difficulte = input("Choisissez entre une IA aléatoire ou gloutonne : ")
-
+            difficulte = input("Choisissez entre une IA aléatoire, gloutonne ou minmax : ")
+        if difficulte=='minmax':
+            max_prof=int(input('entrez une profondeur maximale : '))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
     win = False
     win_stop = 0  # winstop = True si le talon est vide et le cp peut pas jouer
-    current_game: Chain = Chain(biggest_domino)  # chain prend en argument le premier domino de la chaine
+    current_game: Chain = Chain([biggest_domino])  # chain prend en argument le premier domino de la chaine
     remove(biggest_domino, jeu[cp])
     cp = cp % np + 1
     while not win:
@@ -409,11 +428,16 @@ def play_ia():
             else :
                 playable_dom_ia = playable_dominos(jeu[cp], current_game)
                 play_d=-1
+                best_side=''
                 if np == 2 :
                     if difficulte == 'aléatoire' :
                         play_d = choose_alea(playable_dom_ia)
                     elif difficulte == 'gloutonne' :
                         play_d = choose_naive(playable_dom_ia)
+                    elif difficulte == 'minmax':
+                        result = minmax(jeu, current_game, max_prof, 0, cp, np, cp, win_stop, talon)
+                        play_d=result[1]
+                        best_side=result[2]
                 elif np == 3 :
                     if cp == 2:
                         play_d = choose_alea(playable_dom_ia)
@@ -423,17 +447,20 @@ def play_ia():
                 playable_right = False
                 cd = playable_dom_ia[play_d]
                 print(f"le joueur {cp} a joué le domino {cd.t()}")
-                if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
-                    0]:
-                    playable_left = True
-                if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
-                    1]:
-                    playable_right = True
-                if playable_left and playable_right:
-                    sides=['right', 'left']
-                    side = sides[random.randint(0,1)]
+                if best_side=='':
+                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
+                        0]:
+                        playable_left = True
+                    if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == current_game.ex()[
+                        1]:
+                        playable_right = True
+                    if playable_left and playable_right:
+                        sides=['right', 'left']
+                        side = sides[random.randint(0,1)]
+                    else:
+                        side = 'left' if playable_left else 'right'
                 else:
-                    side = 'left' if playable_left else 'right'
+                    side=best_side
             if side == 'right':
                 if cd.t()[0] != current_game.ex()[1]:
                     cd.inv()
