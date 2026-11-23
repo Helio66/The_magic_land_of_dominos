@@ -583,12 +583,116 @@ def play_ia():
     else:
         print(f"Le joueur {cp} a gagné. Bravo !")
 
+def play_full_ia():
+    np = int(input("Combien d'IA voulez-vous voir jouer ?"))
+    joueurs = {}
+    for i in range(np):
+        difficulte = input(f"Choisissez une IA aléatoire, gloutonne ou minmax pour le joueur {i +1} : ")
+        while not (difficulte in ["aléatoire", "gloutonne", "minmax"]):
+            print("ce mode de jeu n'existe pas")
+            difficulte = input(f"Choisissez une IA aléatoire, gloutonne ou minmax pour le joueur {i + 1} : ")
+        if difficulte == 'minmax':
+            max_prof = int(input('entrez une profondeur maximale : '))
+        joueurs[i + 1] = difficulte
+    jeu, talon, cp, biggest_domino = distribute(ensemble, np)
+    win = False
+    win_stop = 0  # winstop = True si le talon est vide et le cp peut pas jouer
+    current_game: Chain = Chain([biggest_domino])  # chain prend en argument le premier domino de la chaine
+    remove(biggest_domino, jeu[cp])
+    cp = cp % np + 1
+    while not win:
+        if can_play(jeu[cp], current_game):  # dans ce cas, le jeu se termine si le joueur n'a plus de domino
+            playable_dom_ia = playable_dominos(jeu[cp], current_game)
+            play_d = -1
+            difficulte = joueurs[cp]
+            best_side = ''
+            if difficulte == 'aléatoire':
+                play_d = choose_alea(playable_dom_ia)
+            elif difficulte == 'gloutonne':
+                play_d = choose_naive(playable_dom_ia)
+            elif difficulte == 'minmax':
+                result = choose_minmax(jeu, current_game, cp, np, max_prof, win_stop)
+                play_d = result[0]
+                best_side = result[1]
+            playable_left = False
+            playable_right = False
+            cd = playable_dom_ia[play_d]
+            print(f"le joueur {cp} a joué le domino {cd.t()}")
+            if best_side == '':
+                if playable_dom_ia[play_d].t()[0] == current_game.ex()[0] or playable_dom_ia[play_d].t()[1] == \
+                        current_game.ex()[
+                            0]:
+                    playable_left = True
+                if playable_dom_ia[play_d].t()[0] == current_game.ex()[1] or playable_dom_ia[play_d].t()[1] == \
+                        current_game.ex()[
+                            1]:
+                    playable_right = True
+                if playable_left and playable_right:
+                    sides = ['right', 'left']
+                    side = sides[random.randint(0, 1)]
+                else:
+                    side = 'left' if playable_left else 'right'
+            else:
+                side = best_side
+            if side == 'right':
+                if cd.t()[0] != current_game.ex()[1]:
+                    cd.inv()
+            else:
+                if cd.t()[1] != current_game.ex()[0]:
+                    cd.inv()
+            current_game.push(cd, side)
+            remove(cd, jeu[cp])
+            if not jeu[cp]:  # si la liste est vide
+                win = True
+            else:
+                win_stop = 0
+                cp = cp % np + 1
+        else:
+            print(f'''le joueur {cp} ne peut pas jouer''')
+            if win_stop == np - 1:
+                win = True
+            else:
+                if talon:
+                    dtemp = talon.pop()
+                    jeu[cp].append(dtemp)
+                    if cp == 1:
+                        print(f'''Vous avez pioché le domino : {dtemp.t()}''')
+                else:
+                    win_stop += 1
+                cp = cp % np + 1
+    if win_stop:
+        score = {}
+        joueur_min = []
+        score_min = 0
+        for j in range(np):
+            score[j + 1] = 0
+        for player in score:
+            for dom in jeu[player]:
+                score[player] += dom.val()
+            if player == 1:
+                score_min = score[1]
+                joueur_min = [1]
+            else:
+                if score[player] < score_min:
+                    score_min = score[player]
+                    joueur_min = [player]
+                elif score[player] == score_min:
+                    joueur_min.append(player)
+        if len(joueur_min) == 1:
+            print(f'''Le joueur {joueur_min[0]} gagne, avec un score de {score_min} ! Bravo :)''')
+        else:
+            print(f'''Les joueurs {joueur_min} ont le même score, c'est un match nul. Bravo à tous !''')
+    else:
+        print(f"Le joueur {cp} a gagné. Bravo !")
+
 def play():
-    style=int(input("Voulez-vous jouer contre un humain ou une ia (enter 0 for human and 1 for AI)? "))
+    style=int(input("Voulez-vous jouer contre un humain, une ia, ou voir plusieurs ia jouer entre elles ? (enter 0 for human, 1 for AI, 2 for only AI)? "))
     if style==0:
         play_human()
-    else :
+    elif style==1 :
         play_ia()
+    else:
+        play_full_ia()
 
 if __name__ == "__main__":
     play()
