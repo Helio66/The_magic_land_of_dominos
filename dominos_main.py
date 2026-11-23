@@ -235,12 +235,14 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
             for d in jeu[i+1]:
                 s+=d.val()
             score[i+1]=s
-        mini=1
+        maxi=1
         for k in score:
-            if score[k]<score[mini]:
-                mini=k
-        if mini==j_ia:
-            return (float('-inf'), 0, 'right')
+            if k==j_ia:
+                continue
+            if score[k]>score[maxi]:
+                maxi=k
+        if score[maxi]<=score[j_ia]:
+            return (score[maxi]-score[j_ia], 0, 'right')
         else:
             return (float('inf'), 0, 'right')
     else :
