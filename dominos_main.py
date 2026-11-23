@@ -160,7 +160,6 @@ def guess_repartition(l:list[Domino], tailles_jeux:list[int], cp):
                 repart.append((g[0],)+r)
         return repart
 
-
 def anonymous_dominos(jeu_ia, current_game:Chain):
     lad=[]
     known={}
@@ -334,7 +333,7 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
                 win_stop += 1
             return minmax(jeu, plateau, max_prof, prof+1, cp%np+1, np, j_ia, win_stop, talon)
 
-def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
+def choose_minmax_1p(jeu, current_game, j_ia, np, max_prof, win_stop):
     anonymous = anonymous_dominos(jeu[j_ia], current_game)
     guesses=guess_repartition_1p(anonymous, len(jeu[j_ia % np + 1]))
     jeu_guess={}
@@ -343,6 +342,35 @@ def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
     for r in guesses:
         jeu_guess[j_ia%np+1]=r[0]
         result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[1])
+        k=(result[1], result[2])
+        if k in results:
+            results[k]+=1
+        else:
+            results[k]=1
+    maxi=0
+    for k in results:
+        if results[k]>maxi:
+            maxi=results[k]
+            kmax=k
+    return kmax
+
+def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
+    anonymous = anonymous_dominos(jeu[j_ia], current_game)
+    tailles_jeux=[]
+    for i in range(np):
+        if i+1!=j_ia:
+            tailles_jeux.append(len(jeu[i+1]))
+    guesses=guess_repartition(anonymous, tailles_jeux, 1)
+    jeu_guess={}
+    jeu_guess[j_ia]=[d for d in jeu[j_ia]]
+    results={}
+    for r in guesses:
+        for i in range(len(r)-1):
+            if i+1<j_ia:
+                jeu_guess[i+1]=r[i]
+            elif i+1>j_ia:
+                jeu_guess[i+1]=r[i-1]
+        result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[len(r)-1])
         k=(result[1], result[2])
         if k in results:
             results[k]+=1
@@ -435,14 +463,15 @@ def play_human() :
 
 def play_ia():
     np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
-    difficulte=''
-    if np == 2 :
-        difficulte = input("Choisissez d'affronter une IA aléatoire, gloutonne ou minmax : ")
+    joueurs={1:'humain'}
+    for i in range(np-1):
+        difficulte = input(f"Choisissez une IA aléatoire, gloutonne ou minmax pour le joueur {i+2} : ")
         while not (difficulte in ["aléatoire", "gloutonne", "minmax"]):
             print("ce mode de jeu n'existe pas")
-            difficulte = input("Choisissez entre une IA aléatoire, gloutonne ou minmax : ")
+            difficulte = input(f"Choisissez une IA aléatoire, gloutonne ou minmax pour le joueur {i+2} : ")
         if difficulte=='minmax':
             max_prof=int(input('entrez une profondeur maximale : '))
+        joueurs[i+2]=difficulte
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
     win = False
     win_stop = 0  # winstop = True si le talon est vide et le cp peut pas jouer
@@ -473,21 +502,16 @@ def play_ia():
             else :
                 playable_dom_ia = playable_dominos(jeu[cp], current_game)
                 play_d=-1
+                difficulte=joueurs[cp]
                 best_side=''
-                if np == 2 :
-                    if difficulte == 'aléatoire' :
-                        play_d = choose_alea(playable_dom_ia)
-                    elif difficulte == 'gloutonne' :
-                        play_d = choose_naive(playable_dom_ia)
-                    elif difficulte == 'minmax':
-                        result = choose_minmax(jeu, current_game, cp, np, max_prof, win_stop)
-                        play_d=result[0]
-                        best_side=result[1]
-                elif np == 3 :
-                    if cp == 2:
-                        play_d = choose_alea(playable_dom_ia)
-                    elif cp == 3 :
-                        play_d = choose_naive(playable_dom_ia)
+                if difficulte == 'aléatoire' :
+                    play_d = choose_alea(playable_dom_ia)
+                elif difficulte == 'gloutonne' :
+                    play_d = choose_naive(playable_dom_ia)
+                elif difficulte == 'minmax':
+                    result = choose_minmax(jeu, current_game, cp, np, max_prof, win_stop)
+                    play_d=result[0]
+                    best_side=result[1]
                 playable_left = False
                 playable_right = False
                 cd = playable_dom_ia[play_d]
