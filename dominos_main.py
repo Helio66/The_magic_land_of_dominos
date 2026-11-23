@@ -131,6 +131,7 @@ def guess_repartition_1p(l, taille_jeu):
                     if not (d in associated):
                         talon.append(d)
                 all_guesses.append((guess, talon))
+    return all_guesses
 
 
 def can_play(jeu_p, plateau) :
