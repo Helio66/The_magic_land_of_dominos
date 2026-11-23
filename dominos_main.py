@@ -142,7 +142,7 @@ def anonymous_dominos(jeu_ia, current_game:Chain):
     for d in jeu_ia:
         known[d.t()]=1
     for d in current_game.plateau():
-        known[d.t()]=1
+        known[d]=1
     for d in ensemble:
         if not (d.t() in known):
             lad.append(d)
