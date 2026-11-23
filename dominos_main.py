@@ -686,7 +686,7 @@ def play_full_ia():
         print(f"Le joueur {cp} a gagné. Bravo !")
 
 def play():
-    style=int(input("Voulez-vous jouer contre un humain, une ia, ou voir plusieurs ia jouer entre elles ? (enter 0 for human, 1 for AI, 2 for only AI)? "))
+    style=int(input("Voulez-vous jouer contre un humain, une ia, ou voir plusieurs ia jouer entre elles (enter 0 for human, 1 for AI, 2 for only AI)? "))
     if style==0:
         play_human()
     elif style==1 :
