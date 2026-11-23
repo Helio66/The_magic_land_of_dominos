@@ -297,27 +297,6 @@ def minmax(jeu_true, plateau_true:Chain, max_prof, prof,cp, np, j_ia, win_stop, 
                 win_stop += 1
             return minmax(jeu, plateau, max_prof, prof+1, cp%np+1, np, j_ia, win_stop, talon)
 
-def choose_minmax_1p(jeu, current_game, j_ia, np, max_prof, win_stop):
-    anonymous = anonymous_dominos(jeu[j_ia], current_game)
-    guesses=guess_repartition_1p(anonymous, len(jeu[j_ia % np + 1]))
-    jeu_guess={}
-    jeu_guess[j_ia]=[d for d in jeu[j_ia]]
-    results={}
-    for r in guesses:
-        jeu_guess[j_ia%np+1]=r[0]
-        result=minmax(jeu_guess, current_game, max_prof, 0, j_ia, np, j_ia, win_stop, r[1])
-        k=(result[1], result[2])
-        if k in results:
-            results[k]+=1
-        else:
-            results[k]=1
-    maxi=0
-    for k in results:
-        if results[k]>maxi:
-            maxi=results[k]
-            kmax=k
-    return kmax
-
 def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
     anonymous = anonymous_dominos(jeu[j_ia], current_game)
     tailles_jeux=[]
