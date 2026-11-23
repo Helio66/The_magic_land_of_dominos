@@ -137,6 +137,30 @@ def guess_repartition_1p(l, taille_jeu):
                     all_guesses.append((guess, talon))
     return all_guesses
 
+def complementary(l, sl):
+    known={}
+    comp=[]
+    for d in sl:
+        known[d.t()]=1
+    for d in l:
+        if not d.t() in known:
+            comp.append(d)
+    return comp
+
+def guess_repartition(l:list[Domino], tailles_jeux:list[int], cp):
+    guesses=guess_repartition_1p(l, tailles_jeux[cp-1])
+    if cp==len(tailles_jeux):
+        return [r for r in guesses]
+    else:
+        repart=[]
+        for g in guesses:
+            comp=complementary(l, g[0])
+            further=guess_repartition(comp, tailles_jeux, cp+1)
+            for r in further:
+                repart.append((g[0],)+r)
+        return repart
+
+
 def anonymous_dominos(jeu_ia, current_game:Chain):
     lad=[]
     known={}
