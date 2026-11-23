@@ -112,7 +112,6 @@ def fusion_sort(l):
 
 def guess_repartition_1p(l, taille_jeu):
     assert taille_jeu<=len(l)
-    tested={}
     all_guesses=[]
     for delay in range(len(l)-taille_jeu+1):
         for i in range(taille_jeu):
