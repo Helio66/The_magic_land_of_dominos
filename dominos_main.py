@@ -219,7 +219,6 @@ def minmax(jeu, plateau, max_prof, prof,cp, np, j_ia, win_stop, talon):#Elle gé
                 win_stop += 1
             return minmax(jeu, plateau, max_prof, prof+1, cp%np+1, np, j_ia, win_stop, talon)
 
-
 def play_human() :
     np = int(input("Entrez le nombre de joueurs: "))
     jeu, talon, cp, biggest_domino = distribute(ensemble, np)
