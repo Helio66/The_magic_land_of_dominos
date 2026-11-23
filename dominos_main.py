@@ -114,23 +114,26 @@ def guess_repartition_1p(l, taille_jeu):
     assert taille_jeu<=len(l)
     tested={}
     all_guesses=[]
-    for i in range(taille_jeu+1):
-        for j in range(len(l)-taille_jeu+1):
-            if j==0 and i!=0:
-                continue
-            else:
-                associated={}
-                guess, talon=[],[]
-                for k in range(taille_jeu-i):
-                    guess.append(l[k])
-                    associated[l[k]]=1
-                for k in range(i):
-                    guess.append(l[taille_jeu-i+j+k])
-                    associated[l[taille_jeu-i+j+k]]=1
-                for d in l:
-                    if not (d in associated):
-                        talon.append(d)
-                all_guesses.append((guess, talon))
+    for delay in range(len(l)-taille_jeu+1):
+        for i in range(taille_jeu):
+            for j in range(len(l)-taille_jeu+1-delay):
+                if j==0 and i!=0:
+                    continue
+                if i==0 and j!=0:
+                    continue
+                else:
+                    associated={}
+                    guess, talon=[],[]
+                    for k in range(taille_jeu-i):
+                        guess.append(l[k+delay])
+                        associated[l[k+delay].t()]=1
+                    for k in range(i):
+                        guess.append(l[taille_jeu-i+j+k+delay])
+                        associated[l[taille_jeu-i+j+k+delay].t()]=1
+                    for d in l:
+                        if not (d.t() in associated):
+                            talon.append(d)
+                    all_guesses.append((guess, talon))
     return all_guesses
 
 
