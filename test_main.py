@@ -189,10 +189,10 @@ class TestGuessRepartition(unittest.TestCase):
         self.assertTrue(len(reps) > 0)
         for rep in reps:
             # une repartition complete pour 2 joueurs : un couple de mains
-            self.assertEqual(len(rep), 2)
+            self.assertEqual(len(rep), 3)
             self.assertEqual(len(rep[0]), 2)
             self.assertEqual(len(rep[1]), 2)
-            toutes = [d.t() for main in rep for d in main]
+            toutes = [d.t() for i in range(2) for d in rep[i]]
             # les deux mains contiennent 4 dominos distincts pris dans la liste
             self.assertEqual(len(set(toutes)), 4)
             self.assertEqual(len(toutes), 4)
