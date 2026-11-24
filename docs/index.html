@@ -208,34 +208,7 @@ pip install PyQt6</code></pre>
   <h3>Avec l'IHM PyQt</h3>
   <p>Deux écrans : les réglages, puis le jeu.</p>
 
-  <div class="figure">
-    <svg viewBox="0 0 760 300" width="100%" role="img" aria-label="Schéma de l'écran de réglages">
-      <rect x="0" y="0" width="760" height="300" rx="10" fill="#f7f7f5" stroke="#d8dadd"/>
-      <text x="380" y="38" text-anchor="middle" font-size="24" font-weight="bold" fill="#0f6b62">Domino</text>
-      <text x="30" y="80" font-size="14" font-weight="600" fill="#233040">Table</text>
-      <text x="30" y="102" font-size="13" fill="#5b6472">Nombre de joueurs :</text>
-      <rect x="190" y="88" width="46" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
-      <text x="206" y="103" font-size="13" fill="#1e2430">2</text>
-      <text x="30" y="140" font-size="14" font-weight="600" fill="#233040">Joueurs</text>
-      <text x="60" y="168" font-size="12" fill="#5b6472">Joueur 1 :</text>
-      <text x="60" y="196" font-size="12" fill="#5b6472">Joueur 2 :</text>
-      <text x="60" y="224" font-size="12" fill="#5b6472">Joueur 3 :</text>
-      <rect x="145" y="154" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
-      <text x="155" y="169" font-size="12" fill="#9aa1aa" font-style="italic">Humain</text>
-      <rect x="145" y="182" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
-      <text x="155" y="197" font-size="12" fill="#1e2430">IA minmax (explore...)</text>
-      <rect x="145" y="210" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
-      <text x="155" y="225" font-size="12" fill="#9aa1aa" font-style="italic">IA gloutonne...</text>
-      <text x="345" y="168" font-size="12" fill="#5b6472">Prof. minmax :</text>
-      <text x="345" y="196" font-size="12" fill="#5b6472">Profondeur :</text>
-      <text x="345" y="224" font-size="12" fill="#5b6472">Profondeur :</text>
-      <rect x="145" y="252" width="360" height="22" rx="11" fill="#fff" stroke="#b9bec6"/>
-      <text x="158" y="267" font-size="11.5" fill="#5b6472">☑ Masquer la main entre deux tours (plusieurs humains)</text>
-      <rect x="540" y="252" width="190" height="30" rx="6" fill="#0f6b62"/>
-      <text x="635" y="272" text-anchor="middle" font-size="14" fill="#fff">Commencer la partie</text>
-    </svg>
-    <figcaption>Schéma indicatif de l'écran de réglages, à remplacer par une vraie capture.</figcaption>
-  </div>
+  <img src="illustrations/def_param.png" alt="écran de définition des paramètres" width="600" height="491" />
 
   <ul>
     <li>On choisit le nombre de joueurs (2 à 4) puis, pour chacun : un nom, un type et, pour minmax,
@@ -246,51 +219,7 @@ pip install PyQt6</code></pre>
     <li>Il faut au moins un humain pour lancer la partie.</li>
   </ul>
 
-  <div class="figure">
-    <svg viewBox="0 0 760 430" width="100%" role="img" aria-label="Schéma de l'écran de jeu">
-      <rect x="0" y="0" width="760" height="430" rx="10" fill="#f7f7f5" stroke="#d8dadd"/>
-      <text x="16" y="28" font-size="14" font-weight="600" fill="#1e2430">À IA minmax (prof. 3) de jouer...</text>
-      <text x="560" y="28" font-size="13" fill="#5b6472">Talon : 10 dominos</text>
-      <text x="16" y="56" font-size="12" fill="#0f6b62" font-weight="600">Manche 1 - Score : Joueur 1 : 0 - IA : 0</text>
-      <text x="16" y="92" font-size="12" font-weight="600" fill="#233040">adversaires (mains cachées)</text>
-      <g>
-        <rect x="30" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="76" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="122" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="168" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="214" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="260" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="306" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="352" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-        <rect x="398" y="102" width="40" height="20" rx="3" fill="#26344a"/>
-      </g>
-      <text x="16" y="150" font-size="11" fill="#9aa1aa" font-style="italic">Zone chaîne avec ascenseur</text>
-      <rect x="30" y="160" width="700" height="130" rx="8" fill="#fff" stroke="#c8ccd2"/>
-      <text x="60" y="240" font-size="30" fill="#233040" font-family="monospace">[2|5]</text>
-      <text x="170" y="240" font-size="30" fill="#233040" font-family="monospace">[5|3]</text>
-      <text x="280" y="240" font-size="30" fill="#233040" font-family="monospace">[3|3]</text>
-      <text x="390" y="240" font-size="30" fill="#233040" font-family="monospace">[3|6]</text>
-      <rect x="30" y="168" width="700" height="8" rx="4" fill="none" stroke="#4fd1c5" stroke-dasharray="5 4"/>
-      <rect x="30" y="280" width="700" height="8" rx="4" fill="none" stroke="#4fd1c5" stroke-dasharray="5 4"/>
-      <text x="16" y="212" font-size="11" fill="#0f6b62">◄ dépôt possible</text>
-      <text x="720" y="212" font-size="11" fill="#0f6b62">dépôt ►</text>
-      <text x="16" y="322" font-size="13" fill="#1e2430" font-weight="600">Votre main - cliquez un domino, puis le côté où le poser :</text>
-      <g>
-        <rect x="30" y="336" width="52" height="28" rx="4" fill="#fff3cd" stroke="#0f6b62" stroke-width="2"/>
-        <text x="36" y="355" font-size="14" fill="#233040" font-family="monospace">[3|6]</text>
-        <rect x="90" y="336" width="52" height="28" rx="4" fill="#fff" stroke="#c8ccd2"/>
-        <text x="96" y="355" font-size="14" fill="#9aa1aa" font-family="monospace">[1|2]</text>
-        <rect x="150" y="336" width="52" height="28" rx="4" fill="#fff3cd" stroke="#0f6b62" stroke-width="2"/>
-        <text x="156" y="355" font-size="14" fill="#233040" font-family="monospace">[6|6]</text>
-        <rect x="210" y="336" width="52" height="28" rx="4" fill="#fff" stroke="#c8ccd2"/>
-        <text x="216" y="355" font-size="14" fill="#9aa1aa" font-family="monospace">[0|4]</text>
-      </g>
-      <text x="16" y="392" font-size="11" fill="#9aa1aa" font-style="italic">Feuille d'événements : ouverture, poses, pioches, passes</text>
-      <text x="16" y="412" font-size="13" fill="#1e2430">Manche terminée : bandeau « gagnant + points », boutons « Nouvelle manche »
-        et « Changer les réglages »</text>
-    </svg>
-    <figcaption>Schéma indicatif de l'écran de jeu, à remplacer par une vraie capture.</figcaption>
-  </div>
+  <img src="illustrations/exemple_partie.png" alt="exemple du déroulé d'une partie" width="600" height="489" />
 
   <ul>
     <li>En haut : le tour, le talon et le score. Au milieu, les adversaires en face cachée et la
