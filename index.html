@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Documentation - The magic land of dominos</title>
+<style>
+  :root{
+    --fond:#f7f7f5; --carte:#ffffff; --encre:#1e2430; --doux:#5b6472;
+    --accent:#0f6b62; --accent-clair:#e2f0ee; --bord:#e3e5e8; --code:#f0efeb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+       color:var(--encre);background:var(--fond);line-height:1.6}
+  .layout{display:flex;min-height:100vh}
+  nav{
+    width:230px;flex-shrink:0;background:#20262f;color:#dfe3e8;
+    padding:22px 0;position:sticky;top:0;height:100vh;overflow:auto
+  }
+  nav h1{font-size:16px;margin:0 20px 4px;color:#fff}
+  nav .sous{font-size:11.5px;color:#93a0ad;margin:0 20px 18px}
+  nav a{
+    display:block;padding:9px 20px;color:#c8d0d8;text-decoration:none;
+    font-size:14px;border-left:3px solid transparent
+  }
+  nav a:hover{background:#2b333e;color:#fff}
+  nav a.actif{background:#2b333e;color:#fff;border-left-color:#4fd1c5}
+  main{flex:1;padding:34px 44px 80px;max-width:920px}
+  section{display:none}
+  section.visible{display:block}
+  h2{color:var(--accent);font-size:26px;margin:0 0 6px;border-bottom:2px solid var(--accent-clair);padding-bottom:8px}
+  h3{font-size:18px;margin:30px 0 8px;color:#233040}
+  p{margin:8px 0}
+  ul,ol{margin:6px 0 12px;padding-left:24px}
+  li{margin:4px 0}
+  code{
+    background:var(--code);border:1px solid var(--bord);border-radius:4px;
+    padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px
+  }
+  pre{
+    background:#262c35;color:#dbe4ee;border-radius:8px;padding:14px 18px;
+    overflow-x:auto;font-family:Consolas,Menlo,monospace;font-size:13.5px;line-height:1.5
+  }
+  pre code{background:none;border:none;color:#9fd8c4;padding:0}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;background:var(--carte)}
+  th,td{border:1px solid var(--bord);padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:var(--accent-clair);color:#134}
+  .carte{background:var(--carte);border:1px solid var(--bord);border-radius:10px;padding:18px 22px;margin:16px 0}
+  .encart{border-left:4px solid var(--accent);background:var(--accent-clair);
+          border-radius:0 8px 8px 0;padding:10px 16px;margin:14px 0;font-size:14.5px}
+  .attention{border-left-color:#c77b00;background:#fdf3e3}
+  .figure{background:var(--carte);border:1px solid var(--bord);border-radius:10px;
+          padding:16px;margin:16px 0;text-align:center}
+  .figure figcaption{font-size:12.5px;color:var(--doux);margin-top:10px;font-style:italic}
+  .badge{display:inline-block;background:var(--accent-clair);color:var(--accent);
+         border-radius:20px;padding:2px 12px;font-size:12.5px;margin:2px 6px 2px 0;font-weight:600}
+  .grise{color:var(--doux);font-size:13px}
+  dl.api{margin:10px 0}
+  dl.api dt{
+    font-family:Consolas,Menlo,monospace;font-weight:700;color:#134;
+    background:var(--accent-clair);border-radius:6px;padding:6px 10px;margin-top:14px;font-size:14px
+  }
+  dl.api dd{margin:6px 0 0 0;padding-left:6px;font-size:14.5px}
+  .pied{margin-top:60px;border-top:1px solid var(--bord);padding-top:14px;color:var(--doux);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav>
+  <h1>🎲 The magic land of dominos</h1>
+  <div class="sous">Jeu de dominos double-six en Python</div>
+  <a href="#presentation" class="actif" data-cible="presentation">1. Présentation</a>
+  <a href="#installation" data-cible="installation">2. Installation et lancement</a>
+  <a href="#guide" data-cible="guide">3. Guide d'utilisation</a>
+  <a href="#architecture" data-cible="architecture">4. Architecture</a>
+  <a href="#ia" data-cible="ia">5. IA</a>
+  <a href="#api" data-cible="api">6. Référence API</a>
+</nav>
+
+<main>
+
+<!-- ============================== 1. PRESENTATION ============================== -->
+<section id="presentation" class="visible">
+  <h2>1. Présentation</h2>
+
+  <p>
+    Le projet est un jeu de dominos double-six (28 pièces) en Python. Il offre la possibilité d'y jouer en console
+    ou sur une interface graphique PyQt, à 2, 3 ou 4 joueurs, contre des IA de trois niveaux différents
+    (aléatoire, gloutonne, minmax) ou avec d'autres humains sur le même écran.
+  </p>
+
+  <h3>Règles</h3>
+  <ul>
+    <li>Chacun reçoit une main depuis les 28 dominos, le reste forme le talon (9 dominos par joueur
+        à 2 joueurs, 7 à 3, 5 à 4 dans la version graphique ; 7 chacun dans la variante console
+        <code>dominos_4_players.py</code>).</li>
+    <li>Ouvre celui qui a le double le plus fort, sinon le domino de plus grande valeur ; il le pose
+        pour démarrer la chaîne.</li>
+    <li>À chaque tour, on pose un domino à gauche ou à droite de la chaîne, chiffre contre chiffre
+        (retournement automatique si besoin).</li>
+    <li>Si aucun de nos dominos ne peut être joué, on pioche une seule carte du talon et son tour passe, 
+        même si elle est jouable. Talon vide ? On passe simplement.</li>
+    <li>Le jeu se termine si l'un des joueurs vide son jeu ou si plus personne ne peut jouer et que le talon
+        est vide. Le joueur ayant vidé son jeu ou celui qui obtient le score le plus faible gagne. En cas 
+        d'égalité, la partie est nulle.</li>
+    <li>Chacun ne connaît que sa main, le plateau et la taille des mains adverses : les IA tranchent sans tricher (voir section 5).</li>
+  </ul>
+
+  <h3>Paramètres du jeu</h3>
+  <ul>
+    <li>Nombre de joueurs : 2 à 4 (minmax limité à 3).</li>
+    <li>Type de chaque joueur</li>
+    <li>Profondeur minmax : 1 à 8, 3 par défaut.</li>
+    <li>Nombre de parties simulées pour les statistiques (section 5).</li>
+  </ul>
+
+  <div class="encart attention">
+    Cas non traîtés : la règle « famille de 5 » (redistribution), la graine aléatoire paramétrable,
+    et le palier 3 de la grille. 
+  </div>
+</section>
+
+<!-- ============================== 2. INSTALLATION ============================== -->
+<section id="installation">
+  <h2>2. Installation et lancement</h2>
+
+  <h3>Prérequis</h3>
+  <ul>
+    <li><strong>Python 3.12 ou supérieur</strong> (imposé par l'énoncé).</li>
+    <li>Pour l'interface graphique uniquement : <strong>PyQt6</strong> (recommandé) ou PyQt5.
+        Le code essaye PyQt6 puis bascule automatiquement sur PyQt5.</li>
+    <li>Aucune autre dépendance : la bibliothèque standard suffit pour la console.</li>
+  </ul>
+
+  <h3>Installation</h3>
+<pre><code># récupérer le dépôt
+git clone https://github.com/Helio66/The_magic_land_of_dominos.git
+cd The_magic_land_of_dominos
+
+# dépendance de l'interface graphique (optionnelle)
+pip install PyQt6</code></pre>
+
+  <h3>Lancement des différents modes</h3>
+  <table>
+    <tr><th>Mode</th><th>Commande</th><th>Description</th></tr>
+    <tr>
+      <td>Console (humain vs humain)</td>
+      <td><code>python dominos_basics.py</code></td>
+      <td>Deux joueurs humains en console.</td>
+    </tr>
+    <tr>
+      <td>Console (humain vs humain)</td>
+      <td><code>python dominos_main.py</code><br>puis <code>0</code></td>
+      <td>plusieurs joueurs humains en console.</td>
+    </tr>
+    <tr>
+      <td>Console (humain vs IA)</td>
+      <td><code>python dominos_main.py</code><br>puis <code>1</code></td>
+      <td>Un humain contre 1 ou plusieurs IA, de niveau choisi, de type aléatoire, gloutonne ou minmax.</td>
+    </tr>
+    <tr>
+      <td>Console (IA vs IA)</td>
+      <td><code>python dominos_main.py</code><br>puis <code>2</code></td>
+      <td>Regarder plusieurs IA s'affronter (aléatoire, gloutonne, minmax).</td>
+    </tr>
+    <tr>
+      <td>Console 4 joueurs</td>
+      <td><code>python dominos_4_players.py</code></td>
+      <td>Variante console à quatre joueurs (7 dominos chacun, sans talon).</td>
+    </tr>
+    <tr>
+      <td>Interface graphique</td>
+      <td><code>python dominos_ihm.py</code></td>
+      <td>IHM PyQt : réglages des joueurs (2 à 4), affichage complet, score sur plusieurs manches.</td>
+    </tr>
+    <tr>
+      <td>Statistiques / tournois</td>
+      <td><code>python dominos_stat.py</code></td>
+      <td>Simule N parties entre IA et affiche le bilan des victoires (voir section 5).</td>
+    </tr>
+    <tr>
+      <td>Tests unitaires</td>
+      <td><code>python -m unittest test_main.py<br>python -m unittest test_basics.py</code></td>
+      <td>Suites de tests sur le moteur (Domino, Chain, distribution, coups légaux, IA...).</td>
+    </tr>
+  </table>
+
+  <div class="encart">
+    <strong>Remarque</strong> : l'interface graphique exige que <code>dominos_main.py</code> et
+    <code>partie.py</code> soient dans le même dossier que <code>dominos_ihm.py</code>.
+    Pour que cette documentation soit consultable hors ligne, placez-la dans le dossier
+    <code>docs/</code> du dépôt sous le nom <code>index.html</code>.
+  </div>
+</section>
+
+<!-- ============================== 3. GUIDE ============================== -->
+<section id="guide">
+  <h2>3. Guide d'utilisation</h2>
+
+  <h3>En console</h3>
+  <ul>
+    <li>Le programme affiche le plateau, votre main et les dominos jouables : on tape l'indice du
+        domino, puis <code>left</code> ou <code>right</code> si les deux côtés marchent.</li>
+    <li>La pioche et le passe-tour sont automatiques, avec le domino pioché affiché.</li>
+    <li>La fin de manche annonce le gagnant et les points.</li>
+  </ul>
+
+  <h3>Avec l'IHM PyQt</h3>
+  <p>Deux écrans : les réglages, puis le jeu.</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 760 300" width="100%" role="img" aria-label="Schéma de l'écran de réglages">
+      <rect x="0" y="0" width="760" height="300" rx="10" fill="#f7f7f5" stroke="#d8dadd"/>
+      <text x="380" y="38" text-anchor="middle" font-size="24" font-weight="bold" fill="#0f6b62">Domino</text>
+      <text x="30" y="80" font-size="14" font-weight="600" fill="#233040">Table</text>
+      <text x="30" y="102" font-size="13" fill="#5b6472">Nombre de joueurs :</text>
+      <rect x="190" y="88" width="46" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
+      <text x="206" y="103" font-size="13" fill="#1e2430">2</text>
+      <text x="30" y="140" font-size="14" font-weight="600" fill="#233040">Joueurs</text>
+      <text x="60" y="168" font-size="12" fill="#5b6472">Joueur 1 :</text>
+      <text x="60" y="196" font-size="12" fill="#5b6472">Joueur 2 :</text>
+      <text x="60" y="224" font-size="12" fill="#5b6472">Joueur 3 :</text>
+      <rect x="145" y="154" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
+      <text x="155" y="169" font-size="12" fill="#9aa1aa" font-style="italic">Humain</text>
+      <rect x="145" y="182" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
+      <text x="155" y="197" font-size="12" fill="#1e2430">IA minmax (explore...)</text>
+      <rect x="145" y="210" width="180" height="22" rx="4" fill="#fff" stroke="#b9bec6"/>
+      <text x="155" y="225" font-size="12" fill="#9aa1aa" font-style="italic">IA gloutonne...</text>
+      <text x="345" y="168" font-size="12" fill="#5b6472">Prof. minmax :</text>
+      <text x="345" y="196" font-size="12" fill="#5b6472">Profondeur :</text>
+      <text x="345" y="224" font-size="12" fill="#5b6472">Profondeur :</text>
+      <rect x="145" y="252" width="360" height="22" rx="11" fill="#fff" stroke="#b9bec6"/>
+      <text x="158" y="267" font-size="11.5" fill="#5b6472">☑ Masquer la main entre deux tours (plusieurs humains)</text>
+      <rect x="540" y="252" width="190" height="30" rx="6" fill="#0f6b62"/>
+      <text x="635" y="272" text-anchor="middle" font-size="14" fill="#fff">Commencer la partie</text>
+    </svg>
+    <figcaption>Schéma indicatif de l'écran de réglages, à remplacer par une vraie capture.</figcaption>
+  </div>
+
+  <ul>
+    <li>On choisit le nombre de joueurs (2 à 4) puis, pour chacun : un nom, un type et, pour minmax,
+        une profondeur (1 à 8).</li>
+    <li>À 4 joueurs, l'option minmax est grisée, avec un mot d'explication.</li>
+    <li>Le masquage des mains sert quand plusieurs humains partagent l'écran : la main ne s'affiche
+        qu'après un clic du joueur concerné.</li>
+    <li>Il faut au moins un humain pour lancer la partie.</li>
+  </ul>
+
+  <div class="figure">
+    <svg viewBox="0 0 760 430" width="100%" role="img" aria-label="Schéma de l'écran de jeu">
+      <rect x="0" y="0" width="760" height="430" rx="10" fill="#f7f7f5" stroke="#d8dadd"/>
+      <text x="16" y="28" font-size="14" font-weight="600" fill="#1e2430">À IA minmax (prof. 3) de jouer...</text>
+      <text x="560" y="28" font-size="13" fill="#5b6472">Talon : 10 dominos</text>
+      <text x="16" y="56" font-size="12" fill="#0f6b62" font-weight="600">Manche 1 - Score : Joueur 1 : 0 - IA : 0</text>
+      <text x="16" y="92" font-size="12" font-weight="600" fill="#233040">adversaires (mains cachées)</text>
+      <g>
+        <rect x="30" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="76" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="122" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="168" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="214" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="260" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="306" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="352" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+        <rect x="398" y="102" width="40" height="20" rx="3" fill="#26344a"/>
+      </g>
+      <text x="16" y="150" font-size="11" fill="#9aa1aa" font-style="italic">Zone chaîne avec ascenseur</text>
+      <rect x="30" y="160" width="700" height="130" rx="8" fill="#fff" stroke="#c8ccd2"/>
+      <text x="60" y="240" font-size="30" fill="#233040" font-family="monospace">[2|5]</text>
+      <text x="170" y="240" font-size="30" fill="#233040" font-family="monospace">[5|3]</text>
+      <text x="280" y="240" font-size="30" fill="#233040" font-family="monospace">[3|3]</text>
+      <text x="390" y="240" font-size="30" fill="#233040" font-family="monospace">[3|6]</text>
+      <rect x="30" y="168" width="700" height="8" rx="4" fill="none" stroke="#4fd1c5" stroke-dasharray="5 4"/>
+      <rect x="30" y="280" width="700" height="8" rx="4" fill="none" stroke="#4fd1c5" stroke-dasharray="5 4"/>
+      <text x="16" y="212" font-size="11" fill="#0f6b62">◄ dépôt possible</text>
+      <text x="720" y="212" font-size="11" fill="#0f6b62">dépôt ►</text>
+      <text x="16" y="322" font-size="13" fill="#1e2430" font-weight="600">Votre main - cliquez un domino, puis le côté où le poser :</text>
+      <g>
+        <rect x="30" y="336" width="52" height="28" rx="4" fill="#fff3cd" stroke="#0f6b62" stroke-width="2"/>
+        <text x="36" y="355" font-size="14" fill="#233040" font-family="monospace">[3|6]</text>
+        <rect x="90" y="336" width="52" height="28" rx="4" fill="#fff" stroke="#c8ccd2"/>
+        <text x="96" y="355" font-size="14" fill="#9aa1aa" font-family="monospace">[1|2]</text>
+        <rect x="150" y="336" width="52" height="28" rx="4" fill="#fff3cd" stroke="#0f6b62" stroke-width="2"/>
+        <text x="156" y="355" font-size="14" fill="#233040" font-family="monospace">[6|6]</text>
+        <rect x="210" y="336" width="52" height="28" rx="4" fill="#fff" stroke="#c8ccd2"/>
+        <text x="216" y="355" font-size="14" fill="#9aa1aa" font-family="monospace">[0|4]</text>
+      </g>
+      <text x="16" y="392" font-size="11" fill="#9aa1aa" font-style="italic">Feuille d'événements : ouverture, poses, pioches, passes</text>
+      <text x="16" y="412" font-size="13" fill="#1e2430">Manche terminée : bandeau « gagnant + points », boutons « Nouvelle manche »
+        et « Changer les réglages »</text>
+    </svg>
+    <figcaption>Schéma indicatif de l'écran de jeu, à remplacer par une vraie capture.</figcaption>
+  </div>
+
+  <ul>
+    <li>En haut : le tour, le talon et le score. Au milieu, les adversaires en face cachée et la
+        chaîne défilable. En bas, votre main.</li>
+    <li>Les dominos jouables sont surlignés : on clique sur un domino puis sur la zone de dépôt de
+        gauche ou de droite ; double-clic si les deux côtés marchent.</li>
+    <li>Les boutons « Piocher » et « Passer » ne s'allument que quand la règle l'autorise.</li>
+    <li>Le journal raconte la partie coup par coup (pioches invisibles le cas échéant).</li>
+    <li>À la fin de la manche, le bandeau propose « Nouvelle manche » (score conservé) ou
+        « Changer les réglages », sans relancer le programme.</li>
+    <li>Pendant que l'IA réfléchit, le calcul tourne dans un fil séparé : l'écran reste réactif.</li>
+  </ul>
+</section>
+
+<!-- ============================== 4. ARCHITECTURE ============================== -->
+<section id="architecture">
+  <h2>4. Architecture</h2>
+
+  <p>
+    Trois couches séparées : le moteur de règles, les IA, et les interfaces. Concrètement,
+    <code>partie.py</code> ne contient aucun code Qt et <code>dominos_main.py</code> contient
+    moteur et IA sans rien d'affichage graphique. Ni le moteur ni les IA ne savent qui les affiche :
+    on peut tout tester en console comme en graphique.
+  </p>
+
+  <div class="figure">
+    <svg viewBox="0 0 860 420" width="100%" role="img" aria-label="Diagramme de l'architecture">
+      <rect x="0" y="0" width="860" height="420" fill="#f7f7f5"/>
+      <rect x="270" y="20" width="200" height="96" rx="10" fill="#e2f0ee" stroke="#0f6b62" stroke-width="2"/>
+      <text x="370" y="48" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f6b62">dominos_main.py</text>
+      <text x="370" y="68" text-anchor="middle" font-size="12" fill="#233040">moteur + 3 IA (référence)</text>
+      <text x="370" y="86" text-anchor="middle" font-size="11" fill="#5b6472">Domino, Chain, distribute,</text>
+      <text x="370" y="102" text-anchor="middle" font-size="11" fill="#5b6472">can_play, minmax, choose_*</text>
+
+      <rect x="270" y="170" width="200" height="96" rx="10" fill="#e2f0ee" stroke="#0f6b62" stroke-width="2"/>
+      <text x="370" y="198" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f6b62">partie.py</text>
+      <text x="370" y="218" text-anchor="middle" font-size="12" fill="#233040">moteur d'une manche (sans Qt)</text>
+      <text x="370" y="236" text-anchor="middle" font-size="11" fill="#5b6472">Partie : poser / piocher / passer</text>
+      <text x="370" y="252" text-anchor="middle" font-size="11" fill="#5b6472">cotes_legaux, choisir_coup_ia, Score</text>
+
+      <rect x="30" y="320" width="240" height="86" rx="10" fill="#fff" stroke="#7a8699" stroke-width="2"/>
+      <text x="150" y="348" text-anchor="middle" font-size="14" font-weight="bold" fill="#233040">dominos_ihm.py</text>
+      <text x="150" y="368" text-anchor="middle" font-size="11.5" fill="#5b6472">IHM PyQt6/5 : PageReglages,</text>
+      <text x="150" y="384" text-anchor="middle" font-size="11.5" fill="#5b6472">PageJeu, MainWidget, ChaineWidget</text>
+
+      <rect x="310" y="320" width="120" height="86" rx="10" fill="#fff" stroke="#7a8699" stroke-width="2"/>
+      <text x="370" y="352" text-anchor="middle" font-size="13" font-weight="bold" fill="#233040">console</text>
+      <text x="370" y="372" text-anchor="middle" font-size="11.5" fill="#5b6472">dominos_main.py</text>
+      <text x="370" y="388" text-anchor="middle" font-size="11.5" fill="#5b6472">(play, play_ia...)</text>
+
+      <rect x="470" y="320" width="150" height="86" rx="10" fill="#fff" stroke="#7a8699" stroke-width="2"/>
+      <text x="545" y="348" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#233040">dominos_stat.py</text>
+      <text x="545" y="368" text-anchor="middle" font-size="11.5" fill="#5b6472">tournois entre IA</text>
+      <text x="545" y="384" text-anchor="middle" font-size="11.5" fill="#5b6472">run_stats()</text>
+
+      <rect x="660" y="320" width="170" height="86" rx="10" fill="#fbf6ec" stroke="#c77b00" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="745" y="348" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#9a5f00">dominos_basics.py</text>
+      <text x="745" y="368" text-anchor="middle" font-size="11.5" fill="#5b6472">v1 : console 2 joueurs</text>
+      <text x="745" y="384" text-anchor="middle" font-size="11.5" fill="#5b6472">(historique, testée)</text>
+
+      <g stroke="#8a94a2" stroke-width="2" fill="none" marker-end="url(#f)">
+        <path d="M 370 116 L 370 170"/>
+        <path d="M 370 266 L 150 320"/>
+        <path d="M 370 266 L 360 320"/>
+        <path d="M 400 266 L 520 320"/>
+      </g>
+      <defs>
+        <marker id="f" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#8a94a2"/>
+        </marker>
+      </defs>
+      <text x="382" y="150" font-size="11" fill="#5b6472">importe</text>
+      <text x="215" y="300" font-size="11" fill="#5b6472">affiche &amp; pilote</text>
+      <text x="255" y="310" font-size="11" fill="#5b6472">joue</text>
+      <text x="430" y="300" font-size="11" fill="#5b6472">simule</text>
+    </svg>
+    <figcaption>Relations entre modules (flèches = imports).</figcaption>
+  </div>
+
+  <h3>Les modules</h3>
+  <table>
+    <tr><th>Module</th><th>À quoi il sert</th></tr>
+    <tr>
+      <td><code>dominos_main.py</code></td>
+      <td>Le cœur : <code>Domino</code>, <code>Chain</code>, <code>distribute</code>, les coups légaux,
+          les trois IA et les modes console (2 à 4 joueurs, avec talon).</td>
+    </tr>
+    <tr>
+      <td><code>partie.py</code></td>
+      <td>Le moteur d'une manche pour l'IHM : état du tour, actions validées, fin de manche, score
+          multi-manches. Zéro Qt, il ne fait que réutiliser <code>dominos_main.py</code>.</td>
+    </tr>
+    <tr>
+      <td><code>dominos_ihm.py</code></td>
+      <td>L'interface graphique PyQt : écran de réglages, écran de jeu, dessin des dominos,
+          coups légaux surlignés, IA lancée dans un thread.</td>
+    </tr>
+    <tr>
+      <td><code>dominos_stat.py</code></td>
+      <td>Les statistiques : <code>run_stats()</code> simule des tournois entre IA (section 5).</td>
+    </tr>
+    <tr>
+      <td><code>dominos_4_players.py</code></td>
+      <td>La variante console à 4 joueurs, sans talon.</td>
+    </tr>
+    <tr>
+      <td><code>dominos_basics.py</code></td>
+      <td>La première version du jeu (2 joueurs, 7 dominos chacun), gardée pour l'historique et les tests.</td>
+    </tr>
+    <tr>
+      <td><code>test_main.py</code><br><code>test_basics.py</code></td>
+      <td>Les tests unittest du moteur : Domino, Chain, distribution, coups légaux, retrait,
+          choix IA, cas limites de minmax.</td>
+    </tr>
+  </table>
+
+  <p>
+    L'ensemble est disponible sur github 
+    <a href="https://github.com/Helio66/The_magic_land_of_dominos">à ce lien</a>
+  </p>
+</section>
+
+<!-- ============================== 5. IA ============================== -->
+<section id="ia">
+  <h2>5. IA</h2>
+
+  <h3>Les trois niveaux</h3>
+  <table>
+    <tr><th>IA</th><th>Idée</th><th>Paramètre</th></tr>
+    <tr><td><strong>Aléatoire</strong></td><td>Joue un coup légal au hasard. C'est la baseline.</td><td>aucun</td></tr>
+    <tr><td><strong>Gloutonne</strong></td><td>Joue le domino le plus lourd pour se défausser de ses points au plus tôt.</td><td>aucun</td></tr>
+    <tr><td><strong>Minmax</strong></td><td>Explore l'arbre des coups jusqu'à une profondeur fixée, en alternant
+        maximisation (elle) et minimisation (adversaires), pioches et passes comprises.</td><td>profondeur, 1 à 8</td></tr>
+  </table>
+
+  <h3>Et la main cachée ?</h3>
+  <p>L'IA minmax ne connaît pas la main adverse, et elle ne triche pas. Elle raisonne par détermination :</p>
+  <ol>
+    <li>elle liste les dominos inconnus (ni dans sa main, ni sur la chaîne) : <code>anonymous_dominos</code> ;</li>
+    <li>elle énumère les répartitions plausibles de ces dominos entre les mains adverses et le talon :
+        <code>guess_repartition</code> ;</li>
+    <li>elle fait tourner minmax sur chaque hypothèse ;</li>
+    <li>elle vote : le coup choisi le plus souvent gagne (<code>choose_minmax</code>), ce qui
+        neutralise les hypothèses fantaisistes.</li>
+  </ol>
+
+  <h3>L'évaluation</h3>
+  <p>
+    En milieu d'arbre, un nœud vaut la somme des points restant dans la main de l'IA : jouer lourd
+    tôt et raccourcir la partie est donc payant, et fermer le jeu devient un objectif, puisque les
+    positions de jeu fermé sont reconnues dans l'arbre (écart de points en fin de partie, bornes
+    franches &plusmn;infini sur une victoire imminente).
+  </p>
+
+  <div class="encart attention">
+    Filet de sécurité : dans <code>partie.py</code>, le coup renvoyé par l'IA est vérifié (indice et
+    côté légaux), et si minmax échoue on retombe sur le glouton. La partie ne se bloque jamais,
+    et le calcul tourne hors du thread d'affichage.
+  </div>
+
+  <h3>Mesurer la force : les tournois</h3>
+  <p><code>python dominos_stat.py</code> demande la composition de la table et le nombre de parties,
+     puis simule tout et affiche le bilan :</p>
+<pre><code>Minimax (profondeur 3) a gagné 83 / 100 parties.</code></pre>
+</section>
+</main>
+</div>
+
+<script>
+  var liens = document.querySelectorAll('nav a');
+  function montrer(id){
+    document.querySelectorAll('section').forEach(function(s){
+      s.classList.toggle('visible', s.id === id);
+    });
+    liens.forEach(function(a){
+      a.classList.toggle('actif', a.dataset.cible === id);
+    });
+    window.scrollTo(0,0);
+  }
+  liens.forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      montrer(a.dataset.cible);
+    });
+  });
+</script>
+</body>
+</html>
