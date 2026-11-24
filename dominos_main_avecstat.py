@@ -380,7 +380,7 @@ def play_human() :
                 else:
                     win_stop+=1
                 cp = cp%np + 1
-    if win_stop :
+    if win_stop==np-1 :
         score= {}
         joueur_min=[]
         score_min=0
@@ -596,7 +596,7 @@ def play_ia():
                 else:
                     win_stop += 1
                 cp = cp % np + 1
-    if win_stop:
+    if win_stop==np-1:
         score = {}
         joueur_min = []
         score_min = 0
@@ -698,7 +698,7 @@ def play_full_ia():
                 else:
                     win_stop += 1
                 cp = cp % np + 1
-    if win_stop:
+    if win_stop==np-1:
         score = {}
         joueur_min = []
         score_min = 0
