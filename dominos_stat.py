@@ -104,6 +104,7 @@ def complementary(l, sl):
     comp=[]
     for d in sl:
         known[d.t()]=1
+        known[(d.t()[1], d.t()[0])] = 1
     for d in l:
         if not d.t() in known:
             comp.append(d)
@@ -127,8 +128,10 @@ def anonymous_dominos(jeu_ia, current_game:Chain):
     known={}
     for d in jeu_ia:
         known[d.t()]=1
+        known[(d.t()[1], d.t()[0])] = 1
     for d in current_game.plateau():
         known[d]=1
+        known[(d[1], d[0])] = 1
     for d in ensemble:
         if not (d.t() in known):
             lad.append(d)
