@@ -87,7 +87,7 @@ def can_play(jeu_p, plateau) :
     for d in jeu_p :
         dom = d.t()
         if left in [dom[0], dom[1]] :
-            return True #...je cherche a acceder au domino qui peut etre joue
+            return True
         elif right in [dom[0], dom[1]] :
             return True
     return False
@@ -96,16 +96,16 @@ def playable_dominos(jeu_p, plateau) :
     playable = []
     for d in jeu_p :
         dom = d.t()
-        if can_play([d], plateau): #cela va nous dire si on peut jouer le domino d
+        if can_play([d], plateau):
             playable.append(d)
     return playable
 
 def remove(d, pile):
     for i in range(len(pile)):
         if pile[i]==d:
-            pile[i], pile[len(pile)-1]=pile[len(pile)-1], pile[i] #on echange les pos pour appliquer pop
+            pile[i], pile[len(pile)-1]=pile[len(pile)-1], pile[i]
             pile.pop()
-            break #on sort de la boucle pour eviter des recursions inutiles qd on a trv d
+            break
 
 def play() :
     jeu_p1, jeu_p2, talon, cp, biggest_domino = distribute(ensemble)
@@ -127,7 +127,7 @@ def play() :
             print(f'''votre jeu actuel est {[d.t() for d in jeu[cp]]}''')
             playable = playable_dominos(jeu[cp], current_game)
             print(f'''vous pouvez jouer les dominos suivants : {[d.t() for d in playable]}''' )
-            play_d=int(input("Entrez l'indice du domino à jouer : ")) #input pour pouvoir entrer une question et une reponse de l'user. on precise int psk ca renvoie forcement une chaine de caractere
+            play_d=int(input("Entrez l'indice du domino à jouer : "))
             playable_left = False
             playable_right = False
             cd = playable[play_d]
