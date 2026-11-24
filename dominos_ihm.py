@@ -1,13 +1,15 @@
 """
-domino_gui.py : interface graphique PyQt (PyQt6 ou PyQt5) du jeu de domino.
+dominos_ihm.py : interface graphique PyQt (PyQt6 ou PyQt5) du jeu de domino.
 
-Lancer :   python domino_gui.py
-Dans le même dossier : domino.py (ton jeu) et partie.py (moteur d'une manche).
+Lancer :   python dominos_ihm.py
+Dans le même dossier : dominos_main.py (ton jeu) et partie.py (moteur d'une manche).
 
-Fonctionnalités : choix du mode (humain/humain ou humain/machine), de l'IA et de ses paramètres ;
-affichage de la chaîne, de la main du joueur courant, du talon et du score ; dominos jouables
-en évidence, choix de l'extrémité ; boutons piocher / passer ; fin de manche ; nouvelle manche
-ou nouvelle partie sans relancer le programme.
+Fonctionnalités : partie à 2, 3 ou 4 joueurs. Chaque joueur est au choix humain, IA aléatoire, IA gloutonne
+ou IA minmax (avec sa profondeur) : plusieurs humains sur le même écran (main masquée entre deux tours),
+un humain contre plusieurs IA, ou n'importe quel mélange. Affichage de la chaîne, de la main du joueur
+courant, des mains cachées des adversaires, du talon et du score ; dominos jouables en évidence, choix de
+l'extrémité ; boutons piocher / passer ; fin de manche ; nouvelle manche ou nouvelle partie sans relancer
+le programme.
 """
 import random
 import sys
@@ -18,7 +20,8 @@ try:
 except ImportError:                      # pas de PyQt6 : on essaie PyQt5
     from PyQt5 import QtCore, QtGui, QtWidgets
 
-from partie import Partie, Score, HUMAIN
+from partie import (Partie, Score, HUMAIN, NB_JOUEURS_MIN, NB_JOUEURS_MAX,
+                    NB_JOUEURS_MAX_MINMAX)
 
 Qt = QtCore.Qt
 
@@ -83,6 +86,7 @@ QLabel#tour { font-size: 20px; font-weight: bold; }
 QLabel#talon { font-size: 16px; font-weight: bold; padding: 0 12px; }
 QLabel#score { color: #555555; }
 QLabel#aide { color: #555555; }
+QLabel#erreur { color: #b3261e; font-weight: bold; }
 QFrame#bandeau { background: #fff3c9; border: 2px solid #f2b01e; border-radius: 10px; }
 QLabel#fin { font-size: 17px; font-weight: bold; }
 QScrollArea { border: none; background: transparent; }
@@ -355,8 +359,29 @@ class ChaineWidget(QtWidgets.QWidget):
 
 
 # ----------------------------------------------------------------------------- écran de réglages
+# (texte affiché, code du mode) pour le type de chaque joueur
+TYPES_JOUEUR = (
+    ("Humain", HUMAIN),
+    ("IA aléatoire (joue au hasard)", "aléatoire"),
+    ("IA gloutonne (pose le domino le plus lourd)", "gloutonne"),
+    ("IA minmax (explore les coups possibles)", "minmax"),
+)
+TYPES_PAR_DEFAUT = (HUMAIN, "minmax", "gloutonne", "aléatoire")     # pour les joueurs 1 à 4
+PROF_REGLAGE_DEFAUT = 3
+
+
+def nom_auto(code, prof, numero):
+    """Nom proposé quand le champ « nom » est laissé vide."""
+    if code == HUMAIN:
+        return "Joueur %d" % numero
+    if code == "minmax":
+        return "IA minmax (prof. %d)" % prof
+    return "IA %s" % code
+
+
 class PageReglages(QtWidgets.QWidget):
-    """Premier écran : mode de jeu, noms, IA adverse et ses paramètres."""
+    """Premier écran : nombre de joueurs (2 à 4) et, pour chacun, son nom et son type
+    (humain ou IA aléatoire / gloutonne / minmax). Tous les mélanges sont possibles."""
     demarrer = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
@@ -371,76 +396,119 @@ class PageReglages(QtWidgets.QWidget):
         titre.setAlignment(ALIGN_CENTRE)
         racine.addWidget(titre)
 
-        boite_mode = W.QGroupBox("Mode de jeu")
-        lm = W.QVBoxLayout(boite_mode)
-        self.rb_hm = W.QRadioButton("Humain contre machine")
-        self.rb_hh = W.QRadioButton("Humain contre humain (même écran)")
-        self.rb_hm.setChecked(True)
-        lm.addWidget(self.rb_hm)
-        lm.addWidget(self.rb_hh)
-        racine.addWidget(boite_mode)
+        # --- nombre de joueurs
+        boite_nb = W.QGroupBox("Table")
+        ln = W.QHBoxLayout(boite_nb)
+        ln.addWidget(W.QLabel("Nombre de joueurs :"))
+        self.sp_nb = W.QSpinBox()
+        self.sp_nb.setRange(NB_JOUEURS_MIN, NB_JOUEURS_MAX)
+        self.sp_nb.setValue(2)
+        ln.addWidget(self.sp_nb)
+        ln.addStretch(1)
+        racine.addWidget(boite_nb)
 
-        boite_noms = W.QGroupBox("Joueurs")
-        fn = W.QFormLayout(boite_noms)
-        self.nom1 = W.QLineEdit("Joueur 1")
-        self.nom2 = W.QLineEdit("Joueur 2")
-        fn.addRow("Nom du joueur 1 :", self.nom1)
-        fn.addRow("Nom du joueur 2 :", self.nom2)
-        self.chk_cacher = W.QCheckBox("Masquer la main entre deux tours (pour ne pas voir celle de l'autre)")
+        # --- un siège par joueur : nom, type, profondeur minmax
+        boite_j = W.QGroupBox("Joueurs")
+        grille = W.QGridLayout(boite_j)
+        grille.setHorizontalSpacing(10)
+        grille.addWidget(W.QLabel("Nom (facultatif)"), 0, 1)
+        grille.addWidget(W.QLabel("Type"), 0, 2)
+        grille.addWidget(W.QLabel("Profondeur minmax"), 0, 3)
+        self.sieges = []                     # [(étiquette, nom, type, profondeur)] pour les joueurs 1 à 4
+        for k in range(NB_JOUEURS_MAX):
+            etiquette = W.QLabel("Joueur %d :" % (k + 1))
+            nom = W.QLineEdit()
+            type_ = W.QComboBox()
+            for texte, code in TYPES_JOUEUR:
+                type_.addItem(texte, code)
+            type_.setCurrentIndex([code for _, code in TYPES_JOUEUR].index(TYPES_PAR_DEFAUT[k]))
+            prof = W.QSpinBox()
+            prof.setRange(1, 8)
+            prof.setValue(PROF_REGLAGE_DEFAUT)
+            for colonne, widget in enumerate((etiquette, nom, type_, prof)):
+                grille.addWidget(widget, k + 1, colonne)
+            grille.setColumnStretch(1, 1)
+            self.sieges.append((etiquette, nom, type_, prof))
+            nom.textChanged.connect(self._maj)
+            type_.currentIndexChanged.connect(self._maj)
+            prof.valueChanged.connect(self._maj)
+        self.chk_cacher = W.QCheckBox("Masquer la main entre deux tours (plusieurs humains sur le même écran)")
         self.chk_cacher.setChecked(True)
-        fn.addRow(self.chk_cacher)
-        racine.addWidget(boite_noms)
+        grille.addWidget(self.chk_cacher, NB_JOUEURS_MAX + 1, 0, 1, 4)
+        racine.addWidget(boite_j)
 
-        self.boite_ia = W.QGroupBox("IA adverse")
-        fi = W.QFormLayout(self.boite_ia)
-        self.cb_ia = W.QComboBox()
-        self.cb_ia.addItem("Aléatoire (joue au hasard)", "aléatoire")
-        self.cb_ia.addItem("Gloutonne (pose le domino le plus lourd)", "gloutonne")
-        self.cb_ia.addItem("Minmax (explore les coups possibles)", "minmax")
-        self.cb_ia.setCurrentIndex(2)
-        self.sp_prof = W.QSpinBox()
-        self.sp_prof.setRange(1, 8)
-        self.sp_prof.setValue(4)
-        self.lbl_prof = W.QLabel("Profondeur de recherche :")
-        fi.addRow("Type d'IA :", self.cb_ia)
-        fi.addRow(self.lbl_prof, self.sp_prof)
-        racine.addWidget(self.boite_ia)
+        # --- remarques
+        self.lbl_info = W.QLabel()
+        self.lbl_info.setObjectName("aide")
+        self.lbl_info.setWordWrap(True)
+        racine.addWidget(self.lbl_info)
+        self.lbl_erreur = W.QLabel("Il faut au moins un joueur humain.")
+        self.lbl_erreur.setObjectName("erreur")
+        racine.addWidget(self.lbl_erreur)
 
         racine.addStretch(1)
         self.btn = W.QPushButton("Commencer la partie")
         self.btn.setObjectName("principal")
         racine.addWidget(self.btn)
 
-        self.rb_hm.toggled.connect(self._maj)
-        self.cb_ia.currentIndexChanged.connect(self._maj)
+        self.sp_nb.valueChanged.connect(self._maj)
         self.btn.clicked.connect(self._valider)
         self._maj()
 
+    # ---------------------------------------------------------------- cohérence des réglages
     def _maj(self, *_):
-        """Active seulement les réglages qui ont un sens pour le mode choisi."""
-        contre_machine = self.rb_hm.isChecked()
-        self.boite_ia.setEnabled(contre_machine)
-        self.nom2.setEnabled(not contre_machine)
-        self.chk_cacher.setEnabled(not contre_machine)
-        minmax = contre_machine and self.cb_ia.currentData() == "minmax"
-        self.sp_prof.setEnabled(minmax)
-        self.lbl_prof.setEnabled(minmax)
+        """Active seulement les réglages qui ont un sens pour la configuration choisie."""
+        nb = self.sp_nb.value()
+        minmax_permis = nb <= NB_JOUEURS_MAX_MINMAX
+        nb_humains, nb_minmax = 0, 0
+        for k, (etiquette, nom, type_, prof) in enumerate(self.sieges):
+            present = k < nb
+            for widget in (etiquette, nom, type_, prof):
+                widget.setVisible(present)
+            # minmax indisponible à 4 joueurs : on grise l'option (et on bascule en gloutonne si besoin)
+            indice_minmax = type_.findData("minmax")
+            type_.model().item(indice_minmax).setEnabled(minmax_permis)
+            if not minmax_permis and type_.currentData() == "minmax":
+                type_.blockSignals(True)
+                type_.setCurrentIndex(type_.findData("gloutonne"))
+                type_.blockSignals(False)
+            code = type_.currentData()
+            if present:
+                nb_humains += code == HUMAIN
+                nb_minmax += code == "minmax"
+            prof.setEnabled(code == "minmax")
+            nom.setPlaceholderText(nom_auto(code, prof.value(), k + 1))
+        self.chk_cacher.setEnabled(nb_humains >= 2)
+        self.btn.setEnabled(nb_humains >= 1)
+        self.lbl_erreur.setVisible(nb_humains == 0)
+        if not minmax_permis:
+            info = ("Avec %d joueurs, l'IA minmax n'est pas disponible (trop de répartitions possibles "
+                    "des dominos cachés à explorer) : choisissez une IA aléatoire ou gloutonne." % nb)
+        elif nb_minmax and nb == NB_JOUEURS_MAX_MINMAX:
+            info = ("Avec %d joueurs, l'IA minmax peut mettre plusieurs secondes par coup (surtout en début "
+                    "de manche), d'autant plus que sa profondeur est grande." % nb)
+        else:
+            info = ""
+        self.lbl_info.setText(info)
+        self.lbl_info.setVisible(bool(info))
 
     def _valider(self):
-        contre_machine = self.rb_hm.isChecked()
-        ia = self.cb_ia.currentData()
-        prof = self.sp_prof.value()
-        nom1 = self.nom1.text().strip() or "Joueur 1"
-        if contre_machine:
-            nom2 = "IA minmax (prof. %d)" % prof if ia == "minmax" else "IA %s" % ia
-        else:
-            nom2 = self.nom2.text().strip() or "Joueur 2"
+        nb = self.sp_nb.value()
+        modes, profs, bruts = {}, {}, {}
+        for k in range(nb):
+            _, nom, type_, prof = self.sieges[k]
+            numero = k + 1
+            modes[numero] = type_.currentData()
+            profs[numero] = prof.value()
+            bruts[numero] = nom.text().strip() or nom_auto(modes[numero], profs[numero], numero)
+        # deux joueurs ne doivent pas porter le même nom : on ajoute leur numéro
+        noms = {j: (n if list(bruts.values()).count(n) == 1 else "%s (joueur %d)" % (n, j))
+                for j, n in bruts.items()}
         self.demarrer.emit({
-            'mode': 'hm' if contre_machine else 'hh',
-            'noms': {1: nom1, 2: nom2},
-            'ia': ia,
-            'prof': prof,
-            'cacher': self.chk_cacher.isChecked(),
+            'modes': modes,                  # {1: 'humain', 2: 'minmax', ...}
+            'profs': profs,                  # profondeur minmax de chaque joueur
+            'noms': noms,
+            'cacher': self.chk_cacher.isChecked() and self.chk_cacher.isEnabled(),
         })
 
 
@@ -451,7 +519,7 @@ class _PontIA(QtCore.QObject):
 
 
 class PageJeu(QtWidgets.QWidget):
-    """Écran de jeu : relie le moteur (Partie) aux widgets."""
+    """Écran de jeu : relie le moteur (Partie) aux widgets. Gère 2 à 4 joueurs, humains et/ou IA."""
     retour_reglages = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
@@ -460,13 +528,18 @@ class PageJeu(QtWidgets.QWidget):
         self.setAttribute(STYLED_BACKGROUND, True)
         self.partie = None
         self.score = Score()
-        self.reglages = {'mode': 'hm', 'noms': {1: "Joueur 1", 2: "Joueur 2"}, 'cacher': False}
+        self.reglages = {'modes': {1: HUMAIN, 2: HUMAIN}, 'profs': {}, 'cacher': False,
+                         'noms': {1: "Joueur 1", 2: "Joueur 2"}}
+        self.modes = self.reglages['modes']
         self.noms = self.reglages['noms']
+        self.humains = [1, 2]                # numéros des joueurs humains
         self.selection = None                # domino (objet Domino) sélectionné par le joueur
         self.mains_affichees = []            # dominos de la main affichée, dans l'ordre d'affichage
         self.jeton = 0                       # change à chaque nouvelle manche : annule les actions de l'IA en retard
         self.ia_reflechit = False
-        self.joueur_revele = None            # (2 humains) joueur qui a cliqué pour voir sa main
+        self.joueur_revele = None            # (plusieurs humains) joueur qui a cliqué pour voir sa main
+        self.dernier_humain = 1              # (plusieurs humains) dernier humain dont la main a été affichée
+        self.cp_vu = None                    # joueur courant au dernier rafraîchissement de tour
         self.score_enregistre = False
         self.pont = _PontIA()
         self.pont.termine.connect(self._ia_terminee)
@@ -493,12 +566,26 @@ class PageJeu(QtWidgets.QWidget):
 
         self.lbl_score = W.QLabel()
         self.lbl_score.setObjectName("score")
+        self.lbl_score.setWordWrap(True)
         racine.addWidget(self.lbl_score)
 
-        self.lbl_adv = W.QLabel()
-        racine.addWidget(self.lbl_adv)
-        self.adv_w = MainWidget(S=22)
-        racine.addWidget(self.adv_w)
+        # les adversaires (1 à 3), côte à côte : un nom + une rangée de dominos face cachée chacun
+        self.blocs_adv, self.lbls_adv, self.mains_adv = [], [], []
+        ligne_adv = W.QHBoxLayout()
+        for _ in range(NB_JOUEURS_MAX - 1):
+            bloc = W.QWidget()
+            lb = W.QVBoxLayout(bloc)
+            lb.setContentsMargins(0, 0, 0, 0)
+            lb.setSpacing(4)
+            lbl = W.QLabel()
+            main = MainWidget(S=22)
+            lb.addWidget(lbl)
+            lb.addWidget(main, 1)
+            ligne_adv.addWidget(bloc, 1)
+            self.blocs_adv.append(bloc)
+            self.lbls_adv.append(lbl)
+            self.mains_adv.append(main)
+        racine.addLayout(ligne_adv)
 
         self.chaine_w = ChaineWidget()
         defilement = W.QScrollArea()
@@ -562,20 +649,20 @@ class PageJeu(QtWidgets.QWidget):
     def demarrer(self, reglages):
         """Nouvelle partie (score remis à zéro) avec les réglages choisis."""
         self.reglages = reglages
+        self.modes = reglages['modes']
         self.noms = reglages['noms']
-        self.score = Score()
+        self.humains = [j for j in sorted(self.modes) if self.modes[j] == HUMAIN]
+        self.score = Score(len(self.modes))
         self.nouvelle_manche()
 
     def nouvelle_manche(self):
         """Nouvelle manche, le score est conservé."""
         self.jeton += 1                      # annule les timers / threads de la manche précédente
-        if self.reglages['mode'] == 'hm':
-            modes = {1: HUMAIN, 2: self.reglages['ia']}
-        else:
-            modes = {1: HUMAIN, 2: HUMAIN}
-        self.partie = Partie(modes, self.reglages.get('prof', 3))
+        self.partie = Partie(self.modes, self.reglages.get('profs', {}))
         self.selection = None
         self.joueur_revele = None
+        self.dernier_humain = self.humains[0]
+        self.cp_vu = None
         self.score_enregistre = False
         self.ia_reflechit = False
         self._apres_action()
@@ -585,15 +672,37 @@ class PageJeu(QtWidgets.QWidget):
         self.retour_reglages.emit()
 
     # ---------------------------------------------------------------- affichage
+    def _plusieurs_humains_caches(self):
+        """Vrai quand plusieurs humains partagent l'écran et que les mains doivent rester cachées."""
+        return len(self.humains) > 1 and self.reglages.get('cacher', False)
+
     def _est_masquee(self):
-        """2 humains : la main du joueur courant reste cachée tant qu'il n'a pas cliqué dessus."""
+        """Plusieurs humains : la main du joueur courant reste cachée tant qu'il n'a pas cliqué dessus."""
         p = self.partie
-        return (self.reglages.get('mode') == 'hh' and self.reglages.get('cacher', False)
-                and not p.fini and self.joueur_revele != p.cp)
+        return (self._plusieurs_humains_caches() and not p.fini and not p.est_ia(p.cp)
+                and self.joueur_revele != p.cp)
+
+    def _joueur_bas(self):
+        """Joueur humain dont la main est affichée en bas de l'écran.
+        Un seul humain : toujours lui. Plusieurs : celui qui doit jouer (pendant le tour d'une IA,
+        on garde le dernier humain affiché, mais sa main est alors cachée)."""
+        p = self.partie
+        if len(self.humains) == 1:
+            return self.humains[0]
+        if not p.est_ia(p.cp):
+            self.dernier_humain = p.cp
+        return self.dernier_humain
 
     @staticmethod
     def _trier(dominos):
         return sorted(dominos, key=lambda d: tuple(sorted(d.t())))
+
+    def _pioche_visible(self, joueur):
+        """Le domino pioché par `joueur` peut-il être affiché dans le journal ? Jamais pour une IA ;
+        pour un humain, sauf si d'autres humains regardent l'écran avec les mains cachées."""
+        if self.partie.est_ia(joueur):
+            return False
+        return not self._plusieurs_humains_caches()
 
     def _texte_evenement(self, ev):
         genre, joueur = ev[0], ev[1]
@@ -604,16 +713,17 @@ class PageJeu(QtWidgets.QWidget):
             cote = "à gauche" if ev[3] == 'left' else "à droite"
             return "%s pose [%d|%d] %s." % (nom, ev[2][0], ev[2][1], cote)
         if genre == 'pioche':
-            if not self.partie.est_ia(joueur):       # on ne montre que les pioches d'un humain
+            if self._pioche_visible(joueur):
                 return "%s pioche [%d|%d]." % (nom, ev[2][0], ev[2][1])
             return "%s pioche un domino." % nom
         return "%s passe son tour (talon vide)." % nom
 
     def _texte_fin(self):
         p, n = self.partie, self.noms
-        reste = "Points restants : %s %d, %s %d." % (n[1], p.totaux[1], n[2], p.totaux[2])
+        reste = "Points restants : %s." % ", ".join("%s %d" % (n[j], p.totaux[j]) for j in sorted(p.totaux))
         if p.gagnant == 0:
-            return "Partie bloquée : égalité ! " + reste
+            egaux = " et ".join(n[j] for j in p.ex_aequo)
+            return "Partie bloquée : égalité entre %s ! %s" % (egaux, reste)
         if p.bloquee:
             return "Partie bloquée. %s gagne la manche (+%d pts). %s" % (n[p.gagnant], p.points, reste)
         return "%s a posé son dernier domino : manche gagnée (+%d pts). %s" % (n[p.gagnant], p.points, reste)
@@ -622,9 +732,10 @@ class PageJeu(QtWidgets.QWidget):
         p = self.partie
         if p is None:
             return
-        contre_machine = self.reglages['mode'] == 'hm'
-        bas = 1 if contre_machine else p.cp          # joueur dont la main est affichée en bas
-        haut = 3 - bas
+        n = self.noms
+        bas = self._joueur_bas()             # joueur dont la main est affichée en bas
+        # adversaires, dans l'ordre du tour à partir du joueur du bas
+        adversaires = [(bas - 1 + k) % p.np + 1 for k in range(1, p.np)]
         humain_agit = (not p.fini) and (not p.est_ia(p.cp))
         masquee = self._est_masquee()
 
@@ -632,15 +743,15 @@ class PageJeu(QtWidgets.QWidget):
         if p.fini:
             tour = "Manche terminée"
         elif p.est_ia(p.cp):
-            tour = "%s %s" % (self.noms[p.cp], "réfléchit…" if self.ia_reflechit else "joue…")
+            tour = "%s %s" % (n[p.cp], "réfléchit…" if self.ia_reflechit else "joue…")
         else:
-            tour = "À %s de jouer" % self.noms[p.cp]
+            tour = "À %s de jouer" % n[p.cp]
         self.lbl_tour.setText(tour)
         self.btn_reglages.setEnabled(not self.ia_reflechit)   # pas de changement de réglages pendant que l'IA calcule
         self.lbl_talon.setText("Talon : %d" % len(p.talon))
-        s, n = self.score, self.noms
-        texte_score = "Score — %s : %d pts (%d manche(s))   |   %s : %d pts (%d manche(s))" % (
-            n[1], s.points[1], s.manches[1], n[2], s.points[2], s.manches[2])
+        s = self.score
+        texte_score = "Score — " + "   |   ".join(
+            "%s : %d pts (%d manche(s))" % (n[j], s.points[j], s.manches[j]) for j in sorted(self.modes))
         if s.nuls:
             texte_score += "   |   égalités : %d" % s.nuls
         self.lbl_score.setText(texte_score)
@@ -655,10 +766,17 @@ class PageJeu(QtWidgets.QWidget):
             dernier = 0 if p.dernier_cote == 'left' else len(tuiles) - 1
         self.chaine_w.set_etat(tuiles, p.chaine.ex(), cotes, dernier)
 
-        # adversaire (dominos face cachée jusqu'à la fin de la manche)
-        adv = self._trier(p.jeu[haut])
-        self.lbl_adv.setText("%s : %d domino(s) en main" % (n[haut], len(adv)))
-        self.adv_w.set_etat([tuple(sorted(d.t())) for d in adv], dos=not p.fini)
+        # adversaires (dominos face cachée jusqu'à la fin de la manche) ; le joueur courant est marqué ▶
+        for i, bloc in enumerate(self.blocs_adv):
+            if i >= len(adversaires):
+                bloc.setVisible(False)
+                continue
+            j = adversaires[i]
+            main_j = self._trier(p.jeu[j])
+            marque = "▶ " if (j == p.cp and not p.fini) else ""
+            self.lbls_adv[i].setText("%s%s : %d domino(s) en main" % (marque, n[j], len(main_j)))
+            self.mains_adv[i].set_etat([tuple(sorted(d.t())) for d in main_j], dos=not p.fini)
+            bloc.setVisible(True)
 
         # main du joueur affiché en bas
         mains = self._trier(p.jeu[bas])
@@ -669,13 +787,16 @@ class PageJeu(QtWidgets.QWidget):
         indice_selection = None
         if self.selection is not None and self.selection in mains:
             indice_selection = mains.index(self.selection)
-        self.lbl_main.setText("Main de %s" % n[bas])
+        marque = "▶ " if (bas == p.cp and not p.fini) else ""
+        self.lbl_main.setText("%sMain de %s" % (marque, n[bas]))
+        # pendant le tour d'une IA, avec plusieurs humains : la main affichée reste face cachée
+        face_cachee = self._plusieurs_humains_caches() and not p.fini and p.est_ia(p.cp)
         self.main_w.set_etat([tuple(sorted(d.t())) for d in mains], jouables=jouables,
-                             selection=indice_selection, masquee=masquee,
+                             selection=indice_selection, dos=face_cachee, masquee=masquee,
                              texte_masque="%s : cliquez ici pour afficher votre main" % n[bas])
 
         # message, boutons et aide
-        self.lbl_message.setText("   •   ".join(self._texte_evenement(e) for e in p.evenements[-2:]))
+        self.lbl_message.setText("   •   ".join(self._texte_evenement(e) for e in p.evenements[-p.np:]))
         etat = p.etat_tour()
         peut_agir = humain_agit and not masquee
         self.btn_piocher.setEnabled(peut_agir and etat == 'piocher')
@@ -753,10 +874,13 @@ class PageJeu(QtWidgets.QWidget):
     # ---------------------------------------------------------------- enchaînement des tours
     def _apres_action(self):
         """Appelée après chaque action : met à jour l'écran, enregistre le score en fin de manche,
-        et fait jouer l'IA si c'est à elle."""
+        et fait jouer l'IA si c'est à elle (plusieurs IA de suite : elles s'enchaînent toutes seules)."""
         p = self.partie
         self.selection = None
         self.ia_reflechit = False
+        if p.cp != self.cp_vu:               # le tour a changé de main : la main redevient cachée
+            self.joueur_revele = None
+            self.cp_vu = p.cp
         if p.fini and not self.score_enregistre:
             self.score.enregistrer(p)
             self.score_enregistre = True

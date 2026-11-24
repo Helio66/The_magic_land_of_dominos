@@ -1,52 +1,83 @@
 """
-partie.py : moteur d'UNE manche de domino à 2 joueurs, utilisé par l'interface graphique.
+partie.py : moteur d'UNE manche de domino à 2, 3 ou 4 joueurs, utilisé par l'interface graphique.
 
-Il réutilise ton code (domino.py) : distribute, Chain, can_play, playable_dominos, remove,
+Il réutilise ton code (dominos_main.py) : distribute, Chain, can_play, playable_dominos, remove,
 choose_alea, choose_naive, choose_minmax.
 Il ne contient AUCUN code Qt : il décrit seulement l'état du jeu et les règles
-(poser, piocher, passer, fin de manche). L'interface (domino_gui.py) ne fait que l'afficher.
+(poser, piocher, passer, fin de manche). L'interface (dominos_ihm.py) ne fait que l'afficher.
 
-Règles appliquées :
+Chaque joueur (numéroté à partir de 1, comme dans dominos_main.py) est soit humain, soit une IA
+('aléatoire', 'gloutonne' ou 'minmax'). Tous les mélanges sont permis : plusieurs humains,
+un humain contre plusieurs IA, etc. L'IA minmax est limitée à 3 joueurs au plus : avec 4 joueurs,
+ton choose_minmax doit énumérer beaucoup trop de répartitions possibles des dominos cachés.
+
+Règles appliquées (les mêmes que dans dominos_main.py) :
   - le joueur qui a le plus grand double (sinon le plus grand domino) ouvre la manche (distribute) ;
   - un joueur qui ne peut pas jouer pioche UN seul domino (s'il reste du talon), puis son tour passe ;
   - si le talon est vide et qu'il ne peut pas jouer, il passe ;
-  - la manche se termine quand un joueur n'a plus de domino, ou quand les deux joueurs
+  - la manche se termine quand un joueur n'a plus de domino, ou quand tous les joueurs
     passent à la suite (partie bloquée) ;
-  - le gagnant marque les points restants dans la main de l'adversaire
-    (en cas de blocage : la différence entre les deux totaux, le plus petit total gagne).
+  - points marqués par le gagnant : pour chaque adversaire, l'écart entre le total des points restant
+    dans sa main et celui du gagnant. Si le gagnant a vidé sa main, c'est donc la somme des points
+    restant chez les adversaires (avec 2 joueurs, en cas de blocage : la différence entre les deux totaux) ;
+  - en cas de blocage, le plus petit total gagne ; s'il y a égalité pour le plus petit total : manche nulle.
 """
 import random
 
 from dominos_main import (ensemble, Chain, distribute, can_play, playable_dominos, remove,
-                    choose_alea, choose_naive, choose_minmax)
+                          choose_alea, choose_naive, choose_minmax)
 
 HUMAIN = 'humain'
 MODES_IA = ('aléatoire', 'gloutonne', 'minmax')
+NB_JOUEURS_MIN = 2
+NB_JOUEURS_MAX = 4
+NB_JOUEURS_MAX_MINMAX = 3       # au-delà, le nombre d'hypothèses de choose_minmax explose (mémoire et temps)
+PROFONDEUR_DEFAUT = 3
 
 
 class Partie:
-    """État d'une manche. Les joueurs sont numérotés 1 et 2, comme dans domino.py."""
+    """État d'une manche. Les joueurs sont numérotés 1, 2, ... comme dans dominos_main.py."""
 
-    def __init__(self, modes, profondeur=3):
-        """modes : {1: 'humain', 2: 'humain' | 'aléatoire' | 'gloutonne' | 'minmax'}."""
-        self.modes = modes
-        self.profondeur = profondeur            # profondeur max de l'IA minmax
-        # distribute mélange, distribue (9 dominos chacun avec ta version) et désigne qui ouvre
-        self.jeu, self.talon, ouvreur, premier = distribute(ensemble, 2)
+    def __init__(self, modes, profondeur=PROFONDEUR_DEFAUT):
+        """modes : {1: 'humain', 2: 'minmax', 3: 'gloutonne', ...}, un mode par joueur (2 à 4 joueurs).
+        profondeur : profondeur max de l'IA minmax. Un entier (valable pour toutes les IA minmax)
+                     ou un dictionnaire {joueur: profondeur}."""
+        self.np = len(modes)
+        if not NB_JOUEURS_MIN <= self.np <= NB_JOUEURS_MAX:
+            raise ValueError("il faut entre %d et %d joueurs" % (NB_JOUEURS_MIN, NB_JOUEURS_MAX))
+        if sorted(modes) != list(range(1, self.np + 1)):
+            raise ValueError("les joueurs doivent être numérotés 1, 2, ..., %d" % self.np)
+        for mode in modes.values():
+            if mode != HUMAIN and mode not in MODES_IA:
+                raise ValueError("mode de joueur inconnu : %r" % (mode,))
+        if self.np > NB_JOUEURS_MAX_MINMAX and 'minmax' in modes.values():
+            raise ValueError("l'IA minmax n'est disponible que jusqu'à %d joueurs" % NB_JOUEURS_MAX_MINMAX)
+        self.modes = dict(modes)
+        if isinstance(profondeur, dict):
+            self.profondeurs = {j: profondeur.get(j, PROFONDEUR_DEFAUT) for j in self.modes}
+        else:
+            self.profondeurs = {j: profondeur for j in self.modes}
+        # distribute mélange, distribue (9 dominos chacun à 2 joueurs, 7 à 3, 5 à 4) et désigne qui ouvre
+        self.jeu, self.talon, ouvreur, premier = distribute(ensemble, self.np)
         self.chaine = Chain([premier])
         remove(premier, self.jeu[ouvreur])
-        self.cp = ouvreur % 2 + 1               # joueur courant : celui qui n'a pas ouvert
+        self.cp = self.suivant(ouvreur)         # joueur courant : celui qui suit l'ouvreur
         self.passes = 0                         # passes consécutives (talon vide)
         self.fini = False
         self.bloquee = False                    # True si la manche finit par un blocage
-        self.gagnant = None                     # 1, 2, ou 0 pour une égalité
+        self.gagnant = None                     # numéro du gagnant, ou 0 pour une égalité
+        self.ex_aequo = []                      # en cas d'égalité : les joueurs à égalité
         self.points = 0                         # points marqués par le gagnant
-        self.totaux = {1: 0, 2: 0}              # points restant dans chaque main en fin de manche
+        self.totaux = {j: 0 for j in self.modes}   # points restant dans chaque main en fin de manche
         self.dernier_cote = None                # côté du dernier domino posé ('left' / 'right')
         # journal des événements : ('ouverture'|'pose'|'pioche'|'passe', joueur, ...)
         self.evenements = [('ouverture', ouvreur, premier.t())]
 
     # ------------------------------------------------------------------ consultation
+    def suivant(self, joueur):
+        """Joueur qui joue après `joueur` (même formule que cp % np + 1 dans dominos_main.py)."""
+        return joueur % self.np + 1
+
     def est_ia(self, joueur):
         return self.modes[joueur] != HUMAIN
 
@@ -99,7 +130,7 @@ class Partie:
         if not self.jeu[self.cp]:               # main vide : le joueur courant gagne la manche
             self._terminer(bloquee=False)
         else:
-            self.cp = self.cp % 2 + 1
+            self.cp = self.suivant(self.cp)
 
     def piocher(self):
         """Le joueur courant (qui ne peut pas jouer) pioche UN SEUL domino, puis son tour se termine
@@ -110,7 +141,7 @@ class Partie:
         domino = self.talon.pop()
         self.jeu[self.cp].append(domino)
         self.evenements.append(('pioche', self.cp, domino.t()))
-        self.cp = self.cp % 2 + 1                # le tour passe à l'autre joueur
+        self.cp = self.suivant(self.cp)          # le tour passe au joueur suivant
         return domino
 
     def passer(self):
@@ -119,24 +150,28 @@ class Partie:
             raise ValueError("on ne peut passer que sans coup possible et avec un talon vide")
         self.passes += 1
         self.evenements.append(('passe', self.cp))
-        if self.passes >= 2:                    # les deux joueurs sont bloqués à la suite
+        if self.passes >= self.np:              # tous les joueurs sont bloqués à la suite
             self._terminer(bloquee=True)
         else:
-            self.cp = self.cp % 2 + 1
+            self.cp = self.suivant(self.cp)
 
     def _terminer(self, bloquee):
         self.fini = True
         self.bloquee = bloquee
-        self.totaux = {j: sum(d.val() for d in self.jeu[j]) for j in (1, 2)}
+        self.totaux = {j: sum(d.val() for d in self.jeu[j]) for j in self.modes}
         if not bloquee:
-            self.gagnant = self.cp
-            self.points = self.totaux[3 - self.cp]
-        elif self.totaux[1] < self.totaux[2]:
-            self.gagnant, self.points = 1, self.totaux[2] - self.totaux[1]
-        elif self.totaux[2] < self.totaux[1]:
-            self.gagnant, self.points = 2, self.totaux[1] - self.totaux[2]
+            gagnants = [self.cp]                # main vide : total nul, c'est forcément le plus petit
         else:
+            plus_petit = min(self.totaux.values())
+            gagnants = [j for j in self.modes if self.totaux[j] == plus_petit]
+        if len(gagnants) == 1:
+            g = gagnants[0]
+            self.gagnant = g
+            self.ex_aequo = []
+            self.points = sum(self.totaux[j] - self.totaux[g] for j in self.modes if j != g)
+        else:                                   # égalité pour le plus petit total : manche nulle
             self.gagnant, self.points = 0, 0
+            self.ex_aequo = gagnants
 
     # ------------------------------------------------------------------ IA
     def choisir_coup_ia(self):
@@ -151,7 +186,8 @@ class Partie:
             i = choose_naive(jouables)
         else:                                   # 'minmax' : ton choose_minmax, qui renvoie (indice, côté)
             try:
-                i, cote = choose_minmax(self.jeu, self.chaine, self.cp, 2, self.profondeur, self.passes)
+                i, cote = choose_minmax(self.jeu, self.chaine, self.cp, self.np,
+                                        self.profondeurs[self.cp], self.passes)
                 if not 0 <= i < len(jouables):
                     raise IndexError("indice de domino hors liste")
             except Exception as erreur:         # garde-fou : on ne bloque jamais la partie
@@ -165,15 +201,16 @@ class Partie:
 
 
 class Score:
-    """Score cumulé sur plusieurs manches."""
+    """Score cumulé sur plusieurs manches (nb_joueurs joueurs, numérotés à partir de 1)."""
 
-    def __init__(self):
-        self.points = {1: 0, 2: 0}
-        self.manches = {1: 0, 2: 0}
+    def __init__(self, nb_joueurs=2):
+        joueurs = range(1, nb_joueurs + 1)
+        self.points = {j: 0 for j in joueurs}
+        self.manches = {j: 0 for j in joueurs}
         self.nuls = 0
 
     def enregistrer(self, partie):
-        if partie.gagnant in (1, 2):
+        if partie.gagnant in self.points:
             self.points[partie.gagnant] += partie.points
             self.manches[partie.gagnant] += 1
         else:
