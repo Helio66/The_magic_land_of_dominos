@@ -308,7 +308,7 @@ def choose_minmax(jeu, current_game, j_ia, np, max_prof, win_stop):
     jeu_guess[j_ia]=[d for d in jeu[j_ia]]
     results={}
     for r in guesses:
-        for i in range(len(r)-1):
+        for i in range(len(r)):
             if i+1<j_ia:
                 jeu_guess[i+1]=r[i]
             elif i+1>j_ia:
