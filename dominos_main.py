@@ -408,7 +408,7 @@ def play_human() :
         print(f"Le joueur {cp} a gagné. Bravo !")
 
 def play_ia():
-    np = int(input("Voulez vous jouer contre 1 ou 2 IA ? "))+1
+    np = int(input("Contre combien d'IA voulez-vous jouer ? "))+1
     joueurs={1:'humain'}
     for i in range(np-1):
         difficulte = input(f"Choisissez une IA aléatoire, gloutonne ou minmax pour le joueur {i+2} : ")
